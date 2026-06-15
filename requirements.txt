@@ -1,0 +1,7 @@
+zeep
+odoorpc
+pymupdf
+pypdf
+lxml
+python-barcode
+Pillow
