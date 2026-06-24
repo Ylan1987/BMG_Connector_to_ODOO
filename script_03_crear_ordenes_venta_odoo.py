@@ -353,17 +353,37 @@ def crear_pedido_venta(odoo_api, trabajos, cliente_id, oportunidad_id, cliente_f
 
         precio_unitario_final = safe_float_conversion(trabajo.get('unit_price_invoice') if moneda_code_actual == mapeos.CURRENCY_USD else trabajo.get('unit_price')) + safe_float_conversion(trabajo.get('unit_price_adjustment'))
         if meli_data:
-            isbn_bmg = trabajo.get('code')
+            isbn_bmg = str(trabajo.get('code') or '')
             pap_id_bmg = limpiar_id(trabajo.get('title_id'), 'PAP')
-            full_pap_bmg = f"PAP{trabajo.get('title_id')}" if not trabajo.get('title_id', '').startswith('PAP') else trabajo.get('title_id')
             
-            # Buscamos por ISBN o por PAP ID en los precios de ML
-            meli_items_prices = meli_data.get('items_prices', {})
-            precio_ml = meli_items_prices.get(isbn_bmg) or meli_items_prices.get(full_pap_bmg) or meli_items_prices.get(pap_id_bmg)
+            precio_ml = None
+            order_items = meli_data.get('raw_data', {}).get('order_items', [])
             
+            for item_line in order_items:
+                if item_line.get('_matched'):
+                    continue
+                    
+                item_info = item_line.get('item', {})
+                sku = str(item_info.get('seller_custom_field') or item_info.get('id') or '')
+                
+                # Buscar un item cuyo seller_sku contenga el TitleID limpio (pap_id_bmg)
+                if pap_id_bmg and pap_id_bmg in sku:
+                    precio_ml = safe_float_conversion(item_line.get('unit_price', 0.0))
+                    item_line['_matched'] = True
+                    break
+                # Fallback al ISBN
+                elif isbn_bmg and isbn_bmg in sku:
+                    precio_ml = safe_float_conversion(item_line.get('unit_price', 0.0))
+                    item_line['_matched'] = True
+                    break
+
             if precio_ml is not None:
-                _logger.info(f"    -> [ML] Ajustando precio del libro (Ref: {isbn_bmg}/{full_pap_bmg}): {precio_ml} (BMG era: {precio_unitario_final})")
+                _logger.info(f"    -> [ML] Coincidencia encontrada. Ajustando precio del libro (Ref BMG: {pap_id_bmg}/{isbn_bmg}): {precio_ml} (BMG era: {precio_unitario_final})")
+                print(f"    -> [ML] Coincidencia encontrada. Ajustando precio del libro (Ref BMG: {pap_id_bmg}/{isbn_bmg}): {precio_ml} (BMG era: {precio_unitario_final})")
                 precio_unitario_final = precio_ml
+            else:
+                _logger.warning(f"    -> [ML] Advertencia: No se encontró coincidencia en ML para el libro (Ref BMG: {pap_id_bmg}/{isbn_bmg}). Se usará el precio original BMG: {precio_unitario_final}")
+                print(f"    -> [ML] ⚠️ Advertencia: No se encontró coincidencia en ML para el libro (Ref BMG: {pap_id_bmg}/{isbn_bmg}). Se usará el precio original BMG: {precio_unitario_final}")
 
         currency_ids = currency_model.search([('name', '=', moneda_code_actual)], limit=1)
         if currency_ids: moneda_id = currency_ids[0]
