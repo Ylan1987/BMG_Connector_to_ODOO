@@ -5,17 +5,17 @@ services:
     restart: always
     volumes:
       # --- RUTA ACTUALIZADA según configuración del NAS ---
-      - /share/Public/AppPedidos/V2.0:/app
+      - /Public/AppPedidos/V2.0:/app
       
       # Mapeo de carpetas de archivos
-      - /share/BMGLocalStorage:/originales
-      - /share/Trabajos/LAD:/salida/LAD
+      - /BMGLocalStorage:/originales
+      - /Trabajos/LAD:/salida/LAD
       
     environment:
       - PYTHONUNBUFFERED=1
     # Mejora: Instalación de fuentes y limpieza de caracteres en logs
     entrypoint: >
-      sh -c "apt-get update && apt-get install -y gcc libxml2-dev libxslt-dev python3-dev libmupdf-dev fontconfig fonts-dejavu &&
+      sh -c "apt-get update && apt-get install -y git gcc libxml2-dev libxslt-dev python3-dev libmupdf-dev fontconfig fonts-dejavu &&
              cd /tmp && pip install --no-cache-dir zeep odoorpc pymupdf pypdf lxml python-barcode Pillow &&
              cd /app && 
              while true; do 
