@@ -2,7 +2,11 @@ import os
 import re
 import sqlite3
 import fitz
+import logging
 from common import mapeos, db_conn, odoo_conn
+
+# Configurar logging
+_logger = logging.getLogger(__name__)
 
 MM_PER_POINT = 25.4 / 72.0
 BLEED_PTS = 3 / MM_PER_POINT
@@ -28,7 +32,6 @@ def obtener_cajas_normalizadas_pypdf(ruta_archivo):
     except: return None
 
 def encontrar_ruta_trabajo_dinamicamente(base_path, publisher_ids_limpios, title_id_limpio):
-    if not os.path.exists(base_path): return None
     pub_ids = []
     for pid in publisher_ids_limpios:
         if not pid: continue
@@ -36,21 +39,43 @@ def encontrar_ruta_trabajo_dinamicamente(base_path, publisher_ids_limpios, title
             clean_p = p.replace('EDIT', '').strip().lstrip('0')
             if clean_p and clean_p not in pub_ids: pub_ids.append(clean_p)
     tid = str(title_id_limpio).replace('PAP', '').strip().lstrip('0')
+    
+    _logger.info(f"      -> Buscando ruta para TitleID: '{tid}' con Publisher IDs: {pub_ids}")
+    _logger.info(f"      -> RUTA BASE A REVISAR: {base_path}")
+
+    if not os.path.exists(base_path):
+        _logger.warning(f"      -> ❌ Ruta base no encontrada: {base_path}")
+        return None
+    
     try:
+        # Structure: base_path / Pais / Facility / Publisher / Title
         for pais_dir in os.listdir(base_path):
             pais_path = os.path.join(base_path, pais_dir)
             if not os.path.isdir(pais_path): continue
-            for root, dirs, files in os.walk(pais_path):
-                for d in dirs:
-                    if any(pid == d.lstrip('0') or pid in d for pid in pub_ids):
-                        pub_path = os.path.join(root, d)
-                        for r_t, d_t, f_t in os.walk(pub_path):
-                            for folder_titulo in d_t:
-                                if folder_titulo.lstrip('0') == tid:
-                                    ruta = os.path.join(r_t, folder_titulo)
-                                    print(f"      -> ✅ Carpeta encontrada: {ruta}")
-                                    return ruta
-    except: pass
+            
+            _logger.info(f"      -> Revisando País: {pais_path}")
+            for facility_dir in os.listdir(pais_path):
+                facility_path = os.path.join(pais_path, facility_dir)
+                if not os.path.isdir(facility_path): continue
+                
+                for pub_dir in os.listdir(facility_path):
+                    current_pub_id = pub_dir.lstrip('0')
+                    current_pub_id = pub_dir.lstrip('0').strip()
+                    if current_pub_id in pub_ids:
+                        pub_path = os.path.join(facility_path, pub_dir)
+                        if not os.path.isdir(pub_path): continue
+
+                        _logger.info(f"      -> Match de Publisher encontrado. Revisando carpeta: {pub_path}")
+                        for title_dir in os.listdir(pub_path):
+                            if title_dir.lstrip('0') == tid:
+                                ruta = os.path.join(pub_path, title_dir)
+                                _logger.info(f"      -> ✅ Carpeta encontrada: {ruta}")
+                                return ruta
+    except Exception as e:
+        _logger.error(f"      -> ❌ Error buscando ruta dinámicamente: {e}")
+        pass
+    
+    _logger.warning(f"      -> ⚠️ No se encontró la carpeta para TitleID: {tid} con los publishers provistos.")
     return None
 
 def encontrar_archivo_mas_reciente(directorio, title_id_limpio, tipo_archivo, order_type):
@@ -96,10 +121,13 @@ def encontrar_archivo_mas_reciente(directorio, title_id_limpio, tipo_archivo, or
 def procesar_tapa(trabajo_actual):
     print("    Procesando TAPA...")
     ruta_orig = trabajo_actual['ruta_archivo_tapa_original']
+    doc = None
     try:
         doc = fitz.open(ruta_orig)
         cajas = obtener_cajas_normalizadas_pypdf(ruta_orig)
-        if not cajas: return None
+        if not cajas: 
+            doc.close()
+            return None
         trim = cajas['trim']
         laminado = trabajo_actual.get('laminate')
         if laminado:
@@ -110,22 +138,49 @@ def procesar_tapa(trabajo_actual):
         if (fw<=320 and fh<=350) or (fh<=320 and fw<=350): ps = "33x36"
         elif (fw<=320 and fh<=470) or (fh<=320 and fw<=470): ps = "33x48.7"
         elif (fw<=320 and fh<=690) or (fh<=320 and fw<=690): ps = "33x70"
-        else: return None
+        else: 
+            doc.close()
+            return None
 
         oc = limpiar_id(trabajo_actual['order_code'], 'PED')
         tit = re.sub(r'[\\/*?:"<>|]', "", trabajo_actual['title'])[:50]
         nom = f"{oc}-{trabajo_actual['line_number']}_{ps}x{trabajo_actual['quantity_requested']}_{tit}.pdf"
         ruta_f = os.path.join(mapeos.DEST_PATH_TAPAS, nom)
-        doc.save(ruta_f); doc.close()
+        doc.save(ruta_f)
+        doc.close()
         return ruta_f
-    except: return None
+    except Exception as e:
+        print(f"      ERROR procesando tapa: {e}")
+        if doc: doc.close()
+        return None
 
 def run():
     if not mapeos.PROCESAR_PDF_ACTIVADO: return
     print("--- Script 7 (TAPA) ---")
-    conn = db_conn.conectar_db(); cursor = conn.cursor()
-    cursor.execute("SELECT * FROM trabajos WHERE odoo_pickings_data_json IS NOT NULL AND estado_tapa_produccion = 'PENDIENTE' AND line_status_id NOT IN (4, 5)")
-    trabajos = [dict(row) for row in cursor.fetchall()]; conn.close()
+    
+    conn = None
+    trabajos = []
+    try:
+        conn = db_conn.conectar_db()
+        if conn:
+            cursor = conn.cursor()
+            placeholders = ','.join('?' for _ in mapeos.ESTADOS_A_EXCLUIR_PRODUCCION)
+            query = f"SELECT * FROM trabajos WHERE odoo_pickings_data_json IS NOT NULL AND estado_tapa_produccion = ? AND (line_status_id IS NULL OR line_status_id NOT IN ({placeholders}))"
+            
+            params = [mapeos.LOCAL_DB_STATUS_TAPA_PENDIENTE] + mapeos.ESTADOS_A_EXCLUIR_PRODUCCION
+            cursor.execute(query, params)
+            
+            trabajos = [dict(row) for row in cursor.fetchall()]
+    except Exception as e:
+        print(f"ERROR en Script 7 al consultar la base de datos: {e}")
+    finally:
+        if conn:
+            conn.close()
+
+    if not trabajos:
+        return
+
+    odoo_api = odoo_conn.conectar_odoo() if trabajos else None
 
     for t in trabajos:
         rt = t.get('ruta_trabajo')
@@ -152,15 +207,26 @@ def run():
                     
                     # --- NOTIFICAR A ODOO ---
                     try:
-                        odoo_api = odoo_conn.conectar_odoo()
                         if odoo_api and t.get('odoo_sale_order_id'):
                             so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
                             so.message_post(body=f"✅ **Producción Tapa:** Generada correctamente.\nArchivo: `{os.path.basename(res)}`")
                     except: pass
+                else:
+                    # Marcar como error en la DB para no trabar el loop
+                    conn = db_conn.conectar_db(); cursor = conn.cursor()
+                    cursor.execute("UPDATE trabajos SET estado_tapa_produccion = 'ERROR' WHERE order_code = ? AND line_number = ?", 
+                                   (t['order_code'], t['line_number']))
+                    conn.commit(); conn.close()
+                    print(f"  ❌ Error al procesar Tapa {t['order_code']}")
+                    try:
+                        if odoo_api and t.get('odoo_sale_order_id'):
+                            so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
+                            body = f"⚠️ **Producción Tapa:** Error al procesar archivo físico (medidas incorrectas o archivo dañado).\nTitleID: {tid}"
+                            so.message_post(body=body)
+                    except: pass
             else:
-                # Notificar fallo detallado
+                # Notificar fallo detallado (no se encontró archivo apto, se mantiene en PENDIENTE)
                 try:
-                    odoo_api = odoo_conn.conectar_odoo()
                     if odoo_api and t.get('odoo_sale_order_id'):
                         so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
                         body = f"⚠️ **Producción Tapa:** {error_msg}\nTitleID: {tid}"

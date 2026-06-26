@@ -251,6 +251,7 @@ def procesar_interior(trabajo_actual):
         return None
 
     ruta_orig = trabajo_actual['ruta_archivo_contenido']
+    doc = None
     try:
         doc = fitz.open(ruta_orig)
         if doc.page_count == 0:
@@ -291,12 +292,8 @@ def procesar_interior(trabajo_actual):
             ny0 = caja_temp.y0 + (caja_temp.height - h_pts_meta) / 2
             caja_de_recorte_pdf_original = fitz.Rect(nx0, ny0, nx0 + w_pts_meta, ny0 + h_pts_meta)
 
-        has_bleed_api = float(trabajo_actual.get('bleed', 0)) > 0
-
-        has_bleed = False
         try:
-            if float(trabajo_actual.get('bleed', 0)) > 0:
-                has_bleed = True
+            has_bleed = float(trabajo_actual.get('bleed', 0)) > 0
         except (ValueError, TypeError):
             has_bleed = False
 
@@ -469,15 +466,37 @@ def procesar_interior(trabajo_actual):
 
         return rutas_guardadas
     except Exception as e:
-        print(f"Error procesando interior: {e}")
+        print(f"      ERROR procesando interior: {e}")
+        if doc: doc.close()
         return None
 
 def run():
     if not mapeos.PROCESAR_PDF_ACTIVADO: return
     print("--- Script 6 (INTERIOR) ---")
-    conn = db_conn.conectar_db(); cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM trabajos WHERE odoo_pickings_data_json IS NOT NULL AND estado_tapa_produccion = '{mapeos.LOCAL_DB_STATUS_TAPA_GENERADO}' AND (estado_interior_produccion IS NULL OR estado_interior_produccion = '{mapeos.LOCAL_DB_STATUS_INTERIOR_PENDIENTE}') AND line_status_id NOT IN (4, 5)")
-    trabajos = [dict(row) for row in cursor.fetchall()]; conn.close()
+
+    conn = None
+    trabajos = []
+    try:
+        conn = db_conn.conectar_db()
+        if conn:
+            cursor = conn.cursor()
+            placeholders = ','.join('?' for _ in mapeos.ESTADOS_A_EXCLUIR_PRODUCCION)
+            query = f"SELECT * FROM trabajos WHERE odoo_pickings_data_json IS NOT NULL AND estado_tapa_produccion = ? AND (estado_interior_produccion IS NULL OR estado_interior_produccion = ?) AND (line_status_id IS NULL OR line_status_id NOT IN ({placeholders}))"
+            
+            params = [mapeos.LOCAL_DB_STATUS_TAPA_GENERADO, mapeos.LOCAL_DB_STATUS_INTERIOR_PENDIENTE] + mapeos.ESTADOS_A_EXCLUIR_PRODUCCION
+            cursor.execute(query, params)
+            
+            trabajos = [dict(row) for row in cursor.fetchall()]
+    except Exception as e:
+        print(f"ERROR en Script 6 al consultar la base de datos: {e}")
+    finally:
+        if conn:
+            conn.close()
+    
+    if not trabajos:
+        return
+
+    odoo_api = odoo_conn.conectar_odoo() if trabajos else None
 
     for t in trabajos:
         rt = t.get('ruta_trabajo')
@@ -495,14 +514,25 @@ def run():
                     print(f"  ✅ Interior {t['order_code']} OK")
                     
                     try:
-                        odoo_api = odoo_conn.conectar_odoo()
                         if odoo_api and t.get('odoo_sale_order_id'):
                             so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
                             so.message_post(body=f"✅ **Producción Interior:** Generado correctamente.\nArchivos: `{', '.join([os.path.basename(r) for r in res])}`")
                     except: pass
+                else:
+                    # Marcar como error en la DB para no trabar el loop
+                    conn = db_conn.conectar_db(); cursor = conn.cursor()
+                    cursor.execute("UPDATE trabajos SET estado_interior_produccion = 'ERROR' WHERE order_code = ? AND line_number = ?", 
+                                   (t['order_code'], t['line_number']))
+                    conn.commit(); conn.close()
+                    print(f"  ❌ Error al procesar Interior {t['order_code']}")
+                    try:
+                        if odoo_api and t.get('odoo_sale_order_id'):
+                            so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
+                            body = f"⚠️ **Producción Interior:** Error al procesar archivo físico (medidas incorrectas o archivo dañado).\nTitleID: {tid}"
+                            so.message_post(body=body)
+                    except: pass
             else:
                 try:
-                    odoo_api = odoo_conn.conectar_odoo()
                     if odoo_api and t.get('odoo_sale_order_id'):
                         so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
                         body = f"⚠️ **Producción Interior:** {error_msg}\nTitleID: {tid}"
