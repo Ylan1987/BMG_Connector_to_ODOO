@@ -186,7 +186,20 @@ ACTIVITY_SUMMARY_RECLAMAR_ARCHIVOS = "Reclamar archivos"
 # PARÁMETROS DE LOS SCRIPTS
 # ============================================================================
 
-BMG_SYNC_DAYS_BACK = 1
+# Estados que no deben ser procesados por los scripts de generación de PDF (06 y 07)
+# Incluye estados pre-producción y estados terminales.
+ESTADOS_A_EXCLUIR_PRODUCCION = [
+    4,  # PENDIENTE DE ORIGINAL
+    5,  # ARCHIVOS RECIBIDOS WEB
+    38, # ANULADO (POD)
+    43, # ENTREGADO (POD)
+    53, # FACTURADO (POD)
+    204, # ENTREGADO (eDist)
+    205, # FACTURADO (eDist)
+    234  # ANULADO (eDist)
+]
+
+BMG_SYNC_DAYS_BACK = 5
 LOCAL_DB_STATUS_NO_APLICA = 'NO_APLICA'
 LOCAL_DB_STATUS_LISTO_PARA_SINCRONIZAR = 'LISTO_PARA_SINCRONIZAR'
 LOCAL_DB_STATUS_LISTADO = 'LISTADO'
