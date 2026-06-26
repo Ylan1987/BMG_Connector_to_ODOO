@@ -119,7 +119,10 @@ def encontrar_archivo_mas_reciente(directorio, title_id_limpio, tipo_archivo, or
     except: return None, "Error al listar el directorio en el NAS."
 
 def procesar_tapa(trabajo_actual):
-    print("    Procesando TAPA...")
+    oc = trabajo_actual.get('order_code')
+    ln = trabajo_actual.get('line_number')
+    tid = trabajo_actual.get('title_id')
+    print(f"    Procesando TAPA -> Pedido: {oc} | Línea: {ln} | TitleID: {tid}")
     ruta_orig = trabajo_actual['ruta_archivo_tapa_original']
     doc = None
     try:

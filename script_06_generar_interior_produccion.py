@@ -245,6 +245,11 @@ def dibujar_lineas_de_corte(page, trim_box, posicion):
         page.draw_line(fitz.Point(x1 + offset, y1), fitz.Point(x1 + offset + longitud_marca, y1), color=color_corte, width=0.25)
 
 def procesar_interior(trabajo_actual):
+    oc = trabajo_actual.get('order_code')
+    ln = trabajo_actual.get('line_number')
+    tid = trabajo_actual.get('title_id')
+    print(f"    Procesando INTERIOR -> Pedido: {oc} | Línea: {ln} | TitleID: {tid}")
+    
     doc_orden_trabajo = crear_pagina_orden_de_trabajo(trabajo_actual)
     if not doc_orden_trabajo:
         print("    ERROR: Se canceló el procesamiento del interior porque no se pudo generar la orden de trabajo.")
