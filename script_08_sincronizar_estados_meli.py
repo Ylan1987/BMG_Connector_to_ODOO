@@ -40,30 +40,33 @@ def sincronizar_estados():
             # Recargar datos después de la actualización de la API
             status_meli = picking.x_meli_shipment_status
             
+            print(f"  -> {picking.name} | Estado ML: '{status_meli}' | Estado Odoo: '{estado_odoo_actual}'", end=" ")
+            
             # LÓGICA DE CAMBIO DE ESTADO EN ODOO
             
             # A. Si en ML está 'shipped' y en Odoo estaba 'assigned' -> Pasamos a 'enviado'
             if status_meli == 'shipped' and estado_odoo_actual == 'assigned':
-                print(f"  🚚 Picking {picking.name}: ML Shipped -> Odoo ENVIADO")
+                print("-> 🟢 Actualizando a ENVIADO")
                 picking.write({'state': 'enviado'})
                 picking.message_post(body="Sistema: Envío detectado en tránsito. Estado Odoo cambiado a 'Enviado'.")
 
             # B. Si en ML está 'delivered' y en Odoo estaba 'enviado' o 'assigned' -> Pasamos a 'done'
             elif status_meli == 'delivered' and estado_odoo_actual in ['assigned', 'enviado']:
-                print(f"  🏁 Picking {picking.name}: ML Delivered -> Odoo HECHO")
-                # En Odoo, para pasar a 'done' generalmente se usa button_validate si queremos procesar stock,
-                # pero como es una actualización de estado logístico, forzamos el estado o usamos el validador con contexto.
+                print("-> 🏁 Actualizando a HECHO")
                 picking.write({'state': 'done'})
                 picking.message_post(body="Sistema: Entrega confirmada por Mercado Libre. Estado Odoo cambiado a 'Hecho'.")
 
             # C. Si en ML está 'cancelled' -> Cancelamos en Odoo
             elif status_meli == 'cancelled' and estado_odoo_actual != 'cancel':
-                print(f"  ❌ Picking {picking.name}: ML Cancelled -> Odoo CANCELADO")
+                print("-> ❌ Cancelando Albarán")
                 picking.action_cancel()
                 picking.message_post(body="Sistema: Venta cancelada en Mercado Libre. Albarán cancelado automáticamente.")
+                
+            else:
+                print("-> ⚪ Sin cambios")
 
         except Exception as e:
-            print(f"  ⚠️ Error procesando picking {picking.name}: {e}")
+            print(f"-> ⚠️ Error procesando picking: {e}")
 
     print("--- Sincronización de estados finalizada ---")
 
