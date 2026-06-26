@@ -17,17 +17,17 @@ def limpiar_id(id_original, prefijo):
     return id_sin_prefijo.lstrip('0')
 
 def obtener_cajas_normalizadas_pypdf(ruta_archivo):
+    import pypdf
     try:
-        with fitz.open(ruta_archivo) as doc:
-            if doc.page_count == 0:
-                return None
-            page = doc[0]
-            media = page.rect
-            trim = page.trimbox if page.trimbox else media
-            tx, ty = -media.x0, -media.y0
+        with open(ruta_archivo, 'rb') as file:
+            reader = pypdf.PdfReader(file)
+            page = reader.pages[0]
+            media = page.mediabox
+            trim = page.get('/TrimBox') or media
+            tx, ty = -float(media[0]), -float(media[1])
             return {
-                'media': fitz.Rect(media.x0+tx, media.y0+ty, media.x1+tx, media.y1+ty),
-                'trim': fitz.Rect(trim.x0+tx, trim.y0+ty, trim.x1+tx, trim.y1+ty)
+                'media': fitz.Rect(float(media[0])+tx, float(media[1])+ty, float(media[2])+tx, float(media[3])+ty),
+                'trim': fitz.Rect(float(trim[0])+tx, float(trim[1])+ty, float(trim[2])+tx, float(trim[3])+ty)
             }
     except: return None
 
