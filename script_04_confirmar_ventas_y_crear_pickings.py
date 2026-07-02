@@ -123,6 +123,21 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
     sale_order = so_model.browse([so_id])
     so_name = sale_order.name
     
+    # --- CHECK FOR EXISTING PICKINGS ---
+    existing_pickings = picking_model.search([('sale_id', '=', so_id), ('state', '!=', 'cancel')])
+    if existing_pickings:
+        print(f"    -> ℹ️ Ya existen {len(existing_pickings)} pickings para el pedido {so_name}. Omitiendo creación de pickings duplicados.")
+        # Retornamos data simulada o los IDs existentes para que el script no falle
+        existing_data = []
+        for pick_id in existing_pickings:
+            existing_data.append({
+                'picking_id': pick_id,
+                'shipping_partner_id': False, # Not strictly needed if they already exist
+                'move_ids': []
+            })
+        return existing_data
+    # -----------------------------------
+
     picking_type_ids = odoo_api.env['stock.picking.type'].search([
         ('code', '=', mapeos.ODOO_PICKING_TYPE_CODE_OUTGOING), ('warehouse_id.company_id', '=', sale_order.company_id.id)
     ], limit=1)
@@ -134,7 +149,7 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
     location_id = picking_type_record.default_location_src_id.id 
     picking_type_id_final = picking_type_record.id 
 
-    variant_to_sol_map = {t['odoo_product_variant_id']: t['odoo_sale_order_line_id'] for t in grupo_trabajos if t.get('odoo_product_variant_id') and t.get('odoo_sale_order_line_id')}
+    title_to_sol_map = {t['title_id']: t.get('odoo_sale_order_line_id') for t in grupo_trabajos if t.get('title_id')}
     title_to_variant_map = {t['title_id']: t.get('odoo_product_variant_id') for t in grupo_trabajos}
     
     # --- NUEVO: Mapeo de variante a descripción para las líneas de movimiento ---
@@ -150,9 +165,10 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
         move_lines = []
         peso_total_envio_gramos = 0
         for titulo in envio.get('Titulos', []):
+            title_id_json = titulo.get('TitleId')
             copies = int(titulo.get('Copies', 0))
-            variant_id = title_to_variant_map.get(titulo.get('TitleId'))
-            sale_line_id = variant_to_sol_map.get(variant_id)
+            variant_id = title_to_variant_map.get(title_id_json)
+            sale_line_id = title_to_sol_map.get(title_id_json)
             
             # Sumar peso de BMG (viene en gramos)
             try:
