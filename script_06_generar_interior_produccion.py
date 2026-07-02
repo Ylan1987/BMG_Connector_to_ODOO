@@ -119,10 +119,14 @@ def crear_pagina_orden_de_trabajo(trabajo_actual):
         ruta_tapa = trabajo_actual.get('ruta_archivo_tapa')
         if ruta_tapa and os.path.exists(ruta_tapa):
             try:
+                import base64
                 with fitz.open(ruta_tapa) as doc_tapa:
                     if doc_tapa.page_count > 0:
                         pix_tapa = doc_tapa[0].get_pixmap()
                         page.insert_image(rect_img, pixmap=pix_tapa, keep_proportion=True)
+                        
+                        img_data = pix_tapa.tobytes("png")
+                        trabajo_actual['b64_tapa'] = base64.b64encode(img_data).decode('utf-8')
             except Exception as e:
                 print(f"      ADVERTENCIA: No se pudo insertar la imagen de la tapa. Error: {e}")
 
@@ -535,7 +539,27 @@ def run():
                     try:
                         if odoo_api and t.get('odoo_sale_order_id'):
                             so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
-                            so.message_post(body=f"✅ **Producción Interior:** Generado correctamente.\nArchivos: `{', '.join([os.path.basename(r) for r in res])}`")
+                            
+                            attachment_ids = []
+                            b64_tapa = t.get('b64_tapa')
+                            if b64_tapa:
+                                try:
+                                    att = odoo_api.env['ir.attachment'].create({
+                                        'name': f"Tapa_Vista_Previa_{t['order_code']}.png",
+                                        'type': 'binary',
+                                        'datas': b64_tapa,
+                                        'res_model': 'sale.order',
+                                        'res_id': t['odoo_sale_order_id'],
+                                        'mimetype': 'image/png'
+                                    })
+                                    attachment_ids.append(att)
+                                except Exception as e_att:
+                                    print(f"      ADVERTENCIA: No se pudo subir el adjunto a Odoo: {e_att}")
+                                    
+                            so.message_post(
+                                body=f"✅ **Producción Interior:** Generado correctamente.\nArchivos: `{', '.join([os.path.basename(r) for r in res])}`",
+                                attachment_ids=attachment_ids
+                            )
                     except: pass
                 else:
                     # Marcar como error en la DB para no trabar el loop
