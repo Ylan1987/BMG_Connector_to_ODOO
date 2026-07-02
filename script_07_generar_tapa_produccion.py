@@ -133,8 +133,23 @@ def procesar_tapa(trabajo_actual):
             return None
         trim = cajas['trim']
         laminado = trabajo_actual.get('laminate')
+        y_base = max(20, trim.y0-28)
         if laminado:
-            doc[0].insert_text(fitz.Point(trim.x0, max(20, trim.y0-28)), f"Laminado: {laminado}", fontsize=10)
+            doc[0].insert_text(fitz.Point(trim.x0, y_base), f"Laminado: {laminado}", fontsize=10)
+        
+        odoo_sale_order_name = trabajo_actual.get('odoo_sale_order_name')
+        if odoo_sale_order_name:
+            try:
+                import io
+                from barcode import Code128
+                from barcode.writer import ImageWriter
+                buffer = io.BytesIO()
+                Code128(odoo_sale_order_name, writer=ImageWriter()).write(buffer, options={'write_text': False})
+                buffer.seek(0)
+                barcode_rect = fitz.Rect(trim.x0 + 150, y_base - 50, trim.x0 + 150 + 400, y_base)
+                doc[0].insert_image(barcode_rect, stream=buffer)
+            except Exception as e:
+                print(f"      ADVERTENCIA: No se pudo insertar el código de barras en la tapa. Error: {e}")
         
         fw, fh = (trim.width + 2*BLEED_PTS)*MM_PER_POINT, (trim.height + 2*BLEED_PTS)*MM_PER_POINT
         ps = ""
