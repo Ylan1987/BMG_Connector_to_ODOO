@@ -545,7 +545,7 @@ def run():
                             if b64_tapa:
                                 try:
                                     att = odoo_api.env['ir.attachment'].create({
-                                        'name': f"Tapa_Vista_Previa_{t['order_code']}.png",
+                                        'name': "tapa-miniatura.png",
                                         'type': 'binary',
                                         'datas': b64_tapa,
                                         'res_model': 'sale.order',
