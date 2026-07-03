@@ -19,8 +19,8 @@ def resetear_pedido():
         # Resetear los flags de PDF generado
         cursor.execute("""
             UPDATE trabajos 
-            SET pdf_interior_generado = 0, 
-                pdf_tapa_generado = 0 
+            SET estado_interior_produccion = 'PENDIENTE', 
+                estado_tapa_produccion = 'PENDIENTE' 
             WHERE order_code = ?
         """, (PEDIDO_A_RESETEAR,))
         

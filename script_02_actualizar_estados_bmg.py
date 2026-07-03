@@ -413,16 +413,27 @@ def run():
                                 if mapeos.PRODUCCION_ACTIVADA:
                                     if odoo_project_task_id:
                                         _move_project_task_stage(odoo_api, odoo_project_task_id, "Planificar producción")
-                                        # Empujar estado "IMPOSICIÓN PENDIENTE" a BMG
                                         _create_bmg_notification(
-                                            odoo_api,
-                                            code,
-                                            line_number,
+                                            odoo_api, code, line_number,
                                             bmg_estados_mapeo.get_bmg_status_id("IMPOSICIÓN PENDIENTE")
-                                            # No pasar el project_task_id para evitar bug en Odoo
                                         )
                                     else:
                                         _logger.warning(f"Pedido {code}-{line_number} en MUESTRA APROBADA pero sin odoo_project_task_id para mover a 'Planificar Producción'.")
+
+                            # BMG Status: ANULADO (IDs 38 para POD, 234 para eDist)
+                            elif new_status_id in (bmg_estados_mapeo.get_bmg_status_id("ANULADO"), 234):
+                                if odoo_sale_order_id:
+                                    try:
+                                        so = odoo_api.env['sale.order'].browse(odoo_sale_order_id)
+                                        if so and so.state not in ('done', 'cancel'):
+                                            so.action_cancel()
+                                            _logger.info(f"✅ Pedido de Venta {so.name} (ID: {odoo_sale_order_id}) cancelado en Odoo.")
+                                        elif so:
+                                            _logger.info(f"Pedido de Venta {so.name} (ID: {odoo_sale_order_id}) ya estaba en estado '{so.state}'. No se requiere acción.")
+                                    except Exception as e:
+                                        _logger.error(f"❌ Error al intentar cancelar el Pedido de Venta ID {odoo_sale_order_id} en Odoo: {e}")
+                                else:
+                                    _logger.warning(f"Línea {code}-{line_number} anulada en BMG, pero no se encontró Pedido de Venta en Odoo para cancelar.")
                         else:
                             _logger.warning(f"No se realizaron acciones en Odoo para {code}-{line_number} porque la conexión a Odoo no está activa.")
                         
