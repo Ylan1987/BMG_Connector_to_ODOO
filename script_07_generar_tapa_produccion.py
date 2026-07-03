@@ -146,9 +146,9 @@ def procesar_tapa(trabajo_actual):
                 buffer = io.BytesIO()
                 Code128(barcode_text, writer=ImageWriter()).write(buffer, options={'write_text': False})
                 
-                # Subimos el código de barras bien arriba para alejarlo de la guillotina (mínimo y=2)
-                y_top = max(2, trim.y0 - 35) 
-                barcode_rect = fitz.Rect(trim.x0 + 150, y_top, trim.x0 + 150 + 150, y_top + 15)
+                # Lo hacemos más ancho (250) y más alto (30), y lo subimos aún más
+                y_top = max(2, trim.y0 - 45) 
+                barcode_rect = fitz.Rect(trim.x0 + 150, y_top, trim.x0 + 150 + 250, y_top + 30)
                 doc[0].insert_image(barcode_rect, stream=buffer.getvalue(), keep_proportion=True)
             except Exception as e:
                 print(f"      ADVERTENCIA: No se pudo insertar el código de barras en la tapa. Error: {e}")
