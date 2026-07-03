@@ -132,6 +132,19 @@ def procesar_tapa(trabajo_actual):
             doc.close()
             return None
         trim = cajas['trim']
+        
+        # --- NUEVO: Agrandar el lienzo (MediaBox) si no hay espacio arriba ---
+        media = doc[0].mediabox
+        espacio_arriba = trim.y0 - media.y0
+        espacio_necesario = 50  # Queremos al menos 50 puntos de margen superior
+        if espacio_arriba < espacio_necesario:
+            falta = espacio_necesario - espacio_arriba
+            nuevo_media = fitz.Rect(media.x0, media.y0 - falta, media.x1, media.y1)
+            doc[0].set_mediabox(nuevo_media)
+            doc[0].set_cropbox(nuevo_media)
+            # Como expandimos el lienzo hacia arriba, y_base ya no tiene riesgo de ser negativo
+        # ---------------------------------------------------------------------
+            
         laminado = trabajo_actual.get('laminate')
         y_base = max(20, trim.y0-28)
         if laminado:
