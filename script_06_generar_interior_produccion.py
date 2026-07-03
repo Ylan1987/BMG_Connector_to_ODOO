@@ -138,9 +138,8 @@ def crear_pagina_orden_de_trabajo(trabajo_actual):
                 from barcode.writer import ImageWriter
                 buffer = io.BytesIO()
                 Code128(barcode_text, writer=ImageWriter()).write(buffer, options={'write_text': False})
-                buffer.seek(0)
-                barcode_rect = fitz.Rect((A4[0]-400)/2, margen+10, (A4[0]+400)/2, margen+60)
-                page.insert_image(barcode_rect, stream=buffer)
+                barcode_rect = fitz.Rect((A4[0]-250)/2, margen+10, (A4[0]+250)/2, margen+50)
+                page.insert_image(barcode_rect, stream=buffer.getvalue())
             except Exception as e:
                 print(f"      ADVERTENCIA: No se pudo insertar el código de barras. Error: {e}")
 

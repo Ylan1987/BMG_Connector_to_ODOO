@@ -145,9 +145,11 @@ def procesar_tapa(trabajo_actual):
                 from barcode.writer import ImageWriter
                 buffer = io.BytesIO()
                 Code128(barcode_text, writer=ImageWriter()).write(buffer, options={'write_text': False})
-                buffer.seek(0)
-                barcode_rect = fitz.Rect(trim.x0 + 150, y_base - 50, trim.x0 + 150 + 400, y_base)
-                doc[0].insert_image(barcode_rect, stream=buffer)
+                
+                # Evitar coordenadas negativas que rompen Adobe Acrobat
+                y_top = max(5, y_base - 30) 
+                barcode_rect = fitz.Rect(trim.x0 + 150, y_top, trim.x0 + 150 + 200, y_top + 30)
+                doc[0].insert_image(barcode_rect, stream=buffer.getvalue())
             except Exception as e:
                 print(f"      ADVERTENCIA: No se pudo insertar el código de barras en la tapa. Error: {e}")
         
