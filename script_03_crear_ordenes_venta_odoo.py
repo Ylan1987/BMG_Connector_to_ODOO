@@ -352,6 +352,16 @@ def crear_pedido_venta(odoo_api, trabajos, cliente_id, oportunidad_id, cliente_f
             if up > 0 and upc > 0: descuento_porcentaje = round((1 - upc / up) * 100)
 
         precio_unitario_final = safe_float_conversion(trabajo.get('unit_price_invoice') if moneda_code_actual == mapeos.CURRENCY_USD else trabajo.get('unit_price')) + safe_float_conversion(trabajo.get('unit_price_adjustment'))
+        
+        # --- DESCUENTO USD 1.5 PARA EXTRANJEROS (BU: eDistribucion, TIPO != eDistribucion) ---
+        is_foreign = (publisher_facility != mapeos.BMG_PUBLISHER_FACILITY_LAD)
+        is_bu_edist = ('edistribucion' in trabajo.get('business_unit', '').lower().replace('ó', 'o'))
+        is_type_edist = ('edistrib' in trabajo.get('order_type', '').lower().replace('ó', 'o'))
+        
+        if is_foreign and is_bu_edist and not is_type_edist:
+            precio_unitario_final = max(0.0, precio_unitario_final - 1.5)
+            print(f"    -> 📉 Aplicando descuento de USD 1.5 (Editor extranjero, BU eDistribucion, Tipo POD). Nuevo precio: {precio_unitario_final}")
+
         if meli_data:
             isbn_bmg = str(trabajo.get('code') or '')
             pap_id_bmg = limpiar_id(trabajo.get('title_id'), 'PAP')
