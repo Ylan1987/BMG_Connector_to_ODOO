@@ -137,14 +137,14 @@ def procesar_tapa(trabajo_actual):
         if laminado:
             doc[0].insert_text(fitz.Point(trim.x0, y_base), f"Laminado: {laminado}", fontsize=10)
         
-        odoo_sale_order_name = trabajo_actual.get('odoo_sale_order_name')
-        if odoo_sale_order_name:
+        barcode_text = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
+        if barcode_text:
             try:
                 import io
                 from barcode import Code128
                 from barcode.writer import ImageWriter
                 buffer = io.BytesIO()
-                Code128(odoo_sale_order_name, writer=ImageWriter()).write(buffer, options={'write_text': False})
+                Code128(barcode_text, writer=ImageWriter()).write(buffer, options={'write_text': False})
                 buffer.seek(0)
                 barcode_rect = fitz.Rect(trim.x0 + 150, y_base - 50, trim.x0 + 150 + 400, y_base)
                 doc[0].insert_image(barcode_rect, stream=buffer)

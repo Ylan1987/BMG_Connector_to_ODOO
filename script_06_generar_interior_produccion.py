@@ -130,14 +130,14 @@ def crear_pagina_orden_de_trabajo(trabajo_actual):
             except Exception as e:
                 print(f"      ADVERTENCIA: No se pudo insertar la imagen de la tapa. Error: {e}")
 
-        odoo_sale_order_name = trabajo_actual.get('odoo_sale_order_name')
-        if odoo_sale_order_name:
+        barcode_text = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
+        if barcode_text:
             try:
                 import io
                 from barcode import Code128
                 from barcode.writer import ImageWriter
                 buffer = io.BytesIO()
-                Code128(odoo_sale_order_name, writer=ImageWriter()).write(buffer, options={'write_text': False})
+                Code128(barcode_text, writer=ImageWriter()).write(buffer, options={'write_text': False})
                 buffer.seek(0)
                 barcode_rect = fitz.Rect((A4[0]-400)/2, margen+10, (A4[0]+400)/2, margen+60)
                 page.insert_image(barcode_rect, stream=buffer)

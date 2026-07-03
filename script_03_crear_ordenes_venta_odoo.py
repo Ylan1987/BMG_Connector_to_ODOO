@@ -570,10 +570,12 @@ def run():
             
             so_id = crear_pedido_venta(odoo_api, grupo, cliente_id, oportunidad_id, cf_id, ce_id, analytic_accounts)
             if so_id:
-                so_record = odoo_api.env['sale.order'].browse(so_id); lineas_odoo = so_record.order_line.read(['id', 'product_id'])
+                so_record = odoo_api.env['sale.order'].browse(so_id); 
+                so_name = so_record.name
+                lineas_odoo = so_record.order_line.read(['id', 'product_id'])
                 mapa = {line['product_id'][0]: line['id'] for line in lineas_odoo if line.get('product_id')}
-                ups = [(so_id, mapa[t.get('odoo_product_variant_id')], order_code, t['line_number']) for t in grupo if t.get('odoo_product_variant_id') in mapa]
-                if ups: conn = db_conn.conectar_db(); cursor = conn.cursor(); cursor.executemany("UPDATE trabajos SET odoo_sale_order_id = ?, odoo_sale_order_line_id = ? WHERE order_code = ? AND line_number = ?", ups); conn.commit(); conn.close()
+                ups = [(so_id, so_name, mapa[t.get('odoo_product_variant_id')], order_code, t['line_number']) for t in grupo if t.get('odoo_product_variant_id') in mapa]
+                if ups: conn = db_conn.conectar_db(); cursor = conn.cursor(); cursor.executemany("UPDATE trabajos SET odoo_sale_order_id = ?, odoo_sale_order_name = ?, odoo_sale_order_line_id = ? WHERE order_code = ? AND line_number = ?", ups); conn.commit(); conn.close()
 
         except Exception as e: print(f"  -> ❌ ERROR FATAL {order_code}: {e}")
 
