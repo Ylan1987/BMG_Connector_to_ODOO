@@ -616,15 +616,20 @@ def run():
                 'origin': sale_order.name,
                 'procurement_group_id': procurement_group_id,
                 mapeos.ODOO_MRP_PRODUCTION_BMG_ORDER_LINE_FIELD: trabajo.get('line_number'),
-                'name': f"{trabajo.get('order_code')}-{trabajo.get('line_number')} {trabajo.get('title')} (SO: {sale_order.name})"
             }
             new_of_id = mrp_production_model.create(of_vals)
             _logger.info(f"    -> OF Principal {new_of_id} creada en borrador.")
 
+            # Asignar un nombre descriptivo pero único usando la secuencia original de Odoo
+            of_record = mrp_production_model.browse(new_of_id)
+            if of_record.name:
+                desc_name = f"{of_record.name} - {trabajo.get('order_code')}-{trabajo.get('line_number')} {trabajo.get('title')} (SO: {sale_order.name})"
+                of_record.write({'name': desc_name[:255]})
+
             _logger.info("  - Confirmando OF principal y su descendencia (hijas, nietas, etc.)...")
             
             try:
-                mrp_production_model.browse(new_of_id).action_confirm()
+                of_record.action_confirm()
                 _logger.info(f"    -> OF Principal {new_of_id} confirmada.")
             except Exception as e:
                 _logger.error(f"    ❌ Error al confirmar la OF principal {new_of_id}: {e}")
@@ -656,14 +661,14 @@ def run():
                     _logger.info(f"    -> Se encontraron {len(ofs_encontradas_ids)} nuevas OFs descendientes. Procesando...")
                     for of_id in ofs_encontradas_ids:
                         try:
-                            of_record = mrp_production_model.browse(of_id)
+                            of_hija_record = mrp_production_model.browse(of_id)
                             
                             write_vals = {
                                 mapeos.ODOO_MRP_PRODUCTION_BMG_ORDER_LINE_FIELD: trabajo.get('line_number')
                             }
                             
                             nuevo_nombre = ""
-                            product_name = of_record.product_id.name or ""
+                            product_name = of_hija_record.product_id.name or ""
                             book_title = trabajo.get('title', '')
 
                             if product_name.startswith('[TAPA]'):
@@ -671,18 +676,18 @@ def run():
                             elif product_name.startswith('[INTERIOR]'):
                                 nuevo_nombre = f"{trabajo.get('order_code')}-{trabajo.get('line_number')} interior de {book_title} (SO: {sale_order.name})"
                             
-                            if nuevo_nombre:
-                                write_vals['name'] = nuevo_nombre
+                            if nuevo_nombre and of_hija_record.name:
+                                write_vals['name'] = f"{of_hija_record.name} - {nuevo_nombre}"[:255]
 
                             _logger.info(f"      -> Asignando datos (Line Number, Nombre) a OF hija {of_id}...")
-                            of_record.write(write_vals) # Update name and custom line field on mrp.production
+                            of_hija_record.write(write_vals) # Update name and custom line field on mrp.production
 
-                            _logger.info(f"      -> Confirmando OF {of_id} ({of_record.product_id.name})...")
-                            of_record.action_confirm()
+                            _logger.info(f"      -> Confirmando OF {of_id} ({of_hija_record.product_id.name})...")
+                            of_hija_record.action_confirm()
                             
-                            if of_record.name:
-                                _logger.info(f"        -> Añadiendo nuevo origen a la búsqueda: '{of_record.name}'")
-                                origenes_a_buscar.add(of_record.name)
+                            if of_hija_record.name:
+                                _logger.info(f"        -> Añadiendo nuevo origen a la búsqueda: '{of_hija_record.name}'")
+                                origenes_a_buscar.add(of_hija_record.name)
                             
                             ofs_procesadas.add(of_id)
                             time.sleep(0.5) 
