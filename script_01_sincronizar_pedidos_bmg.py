@@ -114,6 +114,7 @@ def sincronizar_linea_con_db(order_element, line_element):
         "width": get_text(line_element, 'Width'), "bleed": get_text(line_element, 'Bleed'),
         "spine": get_text(line_element, 'Spine'), "weight": get_text(line_element, 'Weight'),
         "bw_paper_type": get_text(attributes, 'BWPaperType'), "color_paper_type": get_text(attributes, 'ColorPaperType'),
+        "cover_paper_type": get_text(attributes, 'CoverPaperType'),
         "laminate": get_text(attributes, 'Laminate'), "binding": get_text(attributes, 'Binding'),
         "publisher_observations": get_text(line_element, 'PublisherObservations'),
         "cover_printing_type": get_text(attributes, 'CoverPrintingType'),
