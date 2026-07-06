@@ -600,7 +600,8 @@ def run():
                                 body=f"✅ **Producción Interior:** Generado correctamente.\nArchivos: `{', '.join([os.path.basename(r) for r in res])}`",
                                 attachment_ids=attachment_ids
                             )
-                    except: pass
+                    except Exception as e_chatter:
+                        print(f"      ERROR AL ESCRIBIR EN EL CHATTER DE ODOO: {e_chatter}")
                 else:
                     # Marcar como error en la DB para no trabar el loop
                     conn = db_conn.conectar_db(); cursor = conn.cursor()
