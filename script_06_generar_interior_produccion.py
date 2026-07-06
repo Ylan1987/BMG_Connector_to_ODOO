@@ -116,19 +116,56 @@ def crear_pagina_orden_de_trabajo(trabajo_actual):
             use_builtin_fonts = True
 
         rect_img = fitz.Rect(margen, margen, A4[0] - margen, A4[1] / 2)
-        ruta_tapa = trabajo_actual.get('ruta_archivo_tapa')
-        if ruta_tapa and os.path.exists(ruta_tapa):
+        
+        # 1. Intentar usar IMAGEN_TAPA_G desde la ruta original (ruta_trabajo)
+        import glob
+        rt = trabajo_actual.get('ruta_trabajo')
+        jpg_tapa_path = None
+        if rt and os.path.exists(rt):
+            jpgs = glob.glob(os.path.join(rt, '*IMAGEN_TAPA_G*.jpg'))
+            if jpgs:
+                # Si hay varios, ordenar por fecha de modificación y quedarse con el más nuevo
+                jpgs.sort(key=os.path.getmtime, reverse=True)
+                jpg_tapa_path = jpgs[0]
+        
+        if jpg_tapa_path:
             try:
                 import base64
-                with fitz.open(ruta_tapa) as doc_tapa:
-                    if doc_tapa.page_count > 0:
-                        pix_tapa = doc_tapa[0].get_pixmap()
-                        page.insert_image(rect_img, pixmap=pix_tapa, keep_proportion=True)
-                        
-                        img_data = pix_tapa.tobytes("png")
-                        trabajo_actual['b64_tapa'] = base64.b64encode(img_data).decode('utf-8')
+                with open(jpg_tapa_path, 'rb') as f:
+                    img_data = f.read()
+                page.insert_image(rect_img, stream=img_data, keep_proportion=True)
+                trabajo_actual['b64_tapa'] = base64.b64encode(img_data).decode('utf-8')
             except Exception as e:
-                print(f"      ADVERTENCIA: No se pudo insertar la imagen de la tapa. Error: {e}")
+                print(f"      ADVERTENCIA: No se pudo cargar IMAGEN_TAPA_G. Error: {e}")
+        else:
+            # 2. Si no existe el JPG, hacer el recorte del PDF original (Fallback)
+            ruta_tapa = trabajo_actual.get('ruta_archivo_tapa')
+            if ruta_tapa and os.path.exists(ruta_tapa):
+                try:
+                    import base64
+                    with fitz.open(ruta_tapa) as doc_tapa:
+                        if doc_tapa.page_count > 0:
+                            page_tapa = doc_tapa[0]
+                            trimbox = page_tapa.trimbox
+                            
+                            solapa_mm = float(str(trabajo_actual.get('flaps_width') or 0).replace(',', '.'))
+                            ancho_mm = float(str(trabajo_actual.get('width') or 0).replace(',', '.'))
+                            
+                            solapa_pts = solapa_mm * 2.83465
+                            ancho_pts = ancho_mm * 2.83465
+                            
+                            x1 = trimbox.x1 - solapa_pts
+                            x0 = x1 - ancho_pts
+                            
+                            clip_rect = fitz.Rect(x0, trimbox.y0, x1, trimbox.y1)
+                            pix_tapa = page_tapa.get_pixmap(clip=clip_rect)
+                            
+                            page.insert_image(rect_img, pixmap=pix_tapa, keep_proportion=True)
+                            
+                            img_data = pix_tapa.tobytes("png")
+                            trabajo_actual['b64_tapa'] = base64.b64encode(img_data).decode('utf-8')
+                except Exception as e:
+                    print(f"      ADVERTENCIA: No se pudo insertar la imagen de la tapa recortada. Error: {e}")
 
         barcode_text = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
         if barcode_text:
