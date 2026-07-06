@@ -507,14 +507,6 @@ def procesar_interior(trabajo_actual):
 
         imposed_doc.insert_pdf(doc_orden_trabajo, start_at=0)
 
-        # --- REQUERIMIENTO: CANTIDAD DE PÁGINAS PARES ---
-        # Si el documento final tiene cantidad impar de páginas, agregar una en blanco al final.
-        # Esto evita que al imprimir varios PDFs en lote y a doble faz, 
-        # el pedido siguiente arranque en el reverso de la última hoja de este pedido.
-        if len(imposed_doc) % 2 != 0:
-            print("      - PDF final impar. Agregando página en blanco al final para impresión doble faz.")
-            imposed_doc.new_page(width=papel_w_pts, height=papel_h_pts)
-
         rutas_guardadas = []
         rutas_destino_base = []
         if cantidad < 10:
