@@ -2,9 +2,10 @@ import sqlite3
 import math
 import os
 import sys
+from common import mapeos
 
-# Asegurarse de que corra con la DB correcta
-DB_PATH = 'C:/Users/ylana/Downloads/BMG/V2.0/trabajos.db'
+# Usamos la base de datos configurada para el entorno
+DB_PATH = mapeos.DB_FILE
 
 def actualizar_layouts():
     print(f"Conectando a {DB_PATH}...")
