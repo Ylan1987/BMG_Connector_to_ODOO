@@ -15,7 +15,7 @@ def actualizar_layouts():
 
     # Buscamos los que no tengan interior_layout pero que ya hayan sido procesados por el viejo script 6
     cursor.execute("""
-        SELECT id, order_code, line_number, width, height, quantity_requested 
+        SELECT order_code, line_number, width, height, quantity_requested 
         FROM trabajos 
         WHERE interior_layout IS NULL AND estado_interior_produccion = 'GENERADO'
     """)
@@ -56,8 +56,8 @@ def actualizar_layouts():
             cursor.execute("""
                 UPDATE trabajos 
                 SET interior_layout = ?, interior_papel_folder = ?, copias_calculadas = ?
-                WHERE id = ?
-            """, (layout, papel_folder, copias, t['id']))
+                WHERE order_code = ? AND line_number = ?
+            """, (layout, papel_folder, copias, t['order_code'], t['line_number']))
             
             print(f" -> Actualizado {t['order_code']}-{t['line_number']} | Size: {width_mm}x{height_mm}mm | {layout} en {papel_folder} | Copias: {copias}")
             actualizados += 1
