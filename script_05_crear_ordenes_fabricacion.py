@@ -354,8 +354,8 @@ def run():
                         _logger.warning(f"    ⚠️ Advertencia: No se encontró una variante de producto para la plantilla de laminado ID {laminado_template_id}")
                         return
                     laminado_product_id = variant_ids[0]
-                    largo_tapa_mm = float(tamaño_papel_tapa.split('x')[1])
-                    tapa_components.append({'product_id': laminado_product_id, 'quantity': largo_tapa_mm / 1000})
+                    largo_tapa_cm = float(tamaño_papel_tapa.split('x')[1])
+                    tapa_components.append({'product_id': laminado_product_id, 'quantity': largo_tapa_cm / 100})
                     if not any(op['name'] == 'Laminar' for op in tapa_operations):
                         tapa_operations.insert(1, {'name': 'Laminar', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['LAMINADORA'], 'bmg_op_key': 'LAMINAR_TAPA'})
                 else:

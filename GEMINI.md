@@ -18,3 +18,7 @@ Se preparó el terreno para encender oficialmente el orquestador en Odoo sin gen
 El congelamiento inicial (Punto 2) bloqueó la base de datos por completo, afectando también a los pedidos recientes que estaban "en espera" (Ej: estado *Pendiente de Archivos* en BMG).
 *   **Descongelamiento Seguro (`descongelar_crudos.py`):** Se creó y corrió un segundo script en el servidor que evaluó toda la base de datos. Este script devolvió al estado `'PENDIENTE'` **únicamente** a los pedidos que aún no habían sido confirmados en Odoo (los que no tenían un `odoo_pickings_data_json` generado por el Script 4).
 *   **Resultado Final:** Los pedidos verdaderamente viejos (más de 1400) se mantuvieron congelados e inofensivos. Los pedidos en curso (~137, incluyendo `PED00663395` y `PED00663397`) volvieron a la normalidad. Cuando estos pedidos avancen a "Muestra Aprobada" en BMG, el orquestador los confirmará en Odoo y les generará su OF normalmente.
+
+### Tareas Pendientes
+1. **Migrar Reporte de Odoo Test a Producci�n:** Adaptar el reporte personalizado (etiquetas con c�digo de barras y foto de tapa) del Pedido de Venta / Taller (odoo-nesta) para que se imprima directamente desde Producci�n/Ventas.
+2. **Importar el resto de los papeles:** Ejecutar el creador de productos y Listas de Materiales (LdM) en paralelo para los dem�s tipos de papel (aquellos que faltan, excluyendo Obra 80gr, Ahuesado 80gr y Cartulina 250gr que ya se completaron).

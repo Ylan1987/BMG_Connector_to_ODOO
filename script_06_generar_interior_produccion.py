@@ -486,7 +486,7 @@ def procesar_interior(trabajo_actual):
         
         imposed_doc.close()
 
-        return rutas_guardadas
+        return rutas_guardadas, layout, papel_folder, copias
     except Exception as e:
         print(f"      ERROR procesando interior: {e}")
         if doc: doc.close()
@@ -529,9 +529,10 @@ def run():
                 t['ruta_archivo_contenido'] = r_orig
                 res = procesar_interior(t)
                 if res:
+                    rutas_guardadas, layout, papel_folder, copias = res
                     conn = db_conn.conectar_db(); cursor = conn.cursor()
-                    cursor.execute("UPDATE trabajos SET estado_interior_produccion = 'GENERADO', ruta_archivo_contenido = ? WHERE order_code = ? AND line_number = ?", 
-                                   (res[0], t['order_code'], t['line_number']))
+                    cursor.execute("UPDATE trabajos SET estado_interior_produccion = 'GENERADO', ruta_archivo_contenido = ?, interior_layout = ?, interior_papel_folder = ?, copias_calculadas = ? WHERE order_code = ? AND line_number = ?", 
+                                   (rutas_guardadas[0], layout, papel_folder, copias, t['order_code'], t['line_number']))
                     conn.commit(); conn.close()
                     print(f"  ✅ Interior {t['order_code']} OK")
                     
