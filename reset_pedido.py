@@ -5,8 +5,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from common import db_conn
 
 def resetear_pedido():
-    # Podés cambiar el PEDIDO_A_RESETEAR si necesitás probar con otro
-    PEDIDO_A_RESETEAR = 'PED00663377'
+    # Podés cambiar esta lista si necesitás probar con otros
+    PEDIDOS_A_RESETEAR = ['PED00664005', 'PED00663995']
     
     conn = db_conn.conectar_db()
     if not conn:
@@ -16,22 +16,24 @@ def resetear_pedido():
     cursor = conn.cursor()
     
     try:
-        # Resetear los flags de PDF generado
-        cursor.execute("""
-            UPDATE trabajos 
-            SET estado_interior_produccion = 'PENDIENTE', 
-                estado_tapa_produccion = 'PENDIENTE' 
-            WHERE order_code = ?
-        """, (PEDIDO_A_RESETEAR,))
+        for pedido in PEDIDOS_A_RESETEAR:
+            # Resetear los flags de PDF generado
+            cursor.execute("""
+                UPDATE trabajos 
+                SET estado_interior_produccion = 'PENDIENTE', 
+                    estado_tapa_produccion = 'PENDIENTE' 
+                WHERE order_code = ?
+            """, (pedido,))
+            
+            filas_afectadas = cursor.rowcount
+            
+            if filas_afectadas > 0:
+                print(f"✅ ÉXITO: El pedido {pedido} fue reseteado ({filas_afectadas} líneas).")
+            else:
+                print(f"⚠️ ATENCIÓN: No se encontró el pedido {pedido} en la base de datos.")
         
-        filas_afectadas = cursor.rowcount
         conn.commit()
-        
-        if filas_afectadas > 0:
-            print(f"✅ ÉXITO: El pedido {PEDIDO_A_RESETEAR} fue reseteado ({filas_afectadas} líneas).")
-            print("Ahora podés volver a correr el Script 06 (Interior) y Script 07 (Tapa) y lo van a volver a procesar.")
-        else:
-            print(f"⚠️ ATENCIÓN: No se encontró el pedido {PEDIDO_A_RESETEAR} en la base de datos.")
+        print("\nAhora podés volver a correr el orquestador y los va a procesar desde cero.")
             
     except Exception as e:
         print(f"❌ Error al resetear el pedido: {e}")
