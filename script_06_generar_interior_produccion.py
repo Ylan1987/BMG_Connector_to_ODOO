@@ -552,10 +552,10 @@ def run():
         if conn:
             conn.close()
     
-    _logger.info(f"Se encontraron {len(trabajos)} trabajos con interior 'pendiente' en la base de datos local.")
+    print(f"Se encontraron {len(trabajos)} trabajos con interior 'pendiente' en la base de datos local.")
     
     if not trabajos:
-        _logger.info("No hay archivos interiores pendientes por generar. Saliendo del Script 6.")
+        print("No hay archivos interiores pendientes por generar. Saliendo del Script 6.")
         return
 
     odoo_api = odoo_conn.conectar_odoo() if trabajos else None
