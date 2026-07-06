@@ -181,7 +181,7 @@ def procesar_tapa(trabajo_actual):
         ruta_f = os.path.join(mapeos.DEST_PATH_TAPAS, nom)
         doc.save(ruta_f)
         doc.close()
-        return ruta_f
+        return ruta_f, ps
     except Exception as e:
         print(f"      ERROR procesando tapa: {e}")
         if doc: doc.close()
@@ -232,9 +232,10 @@ def run():
                 t['ruta_archivo_tapa_original'] = r_orig
                 res = procesar_tapa(t)
                 if res:
+                    ruta_f, ps = res
                     conn = db_conn.conectar_db(); cursor = conn.cursor()
-                    cursor.execute("UPDATE trabajos SET estado_tapa_produccion = 'GENERADO', ruta_archivo_tapa = ? WHERE order_code = ? AND line_number = ?", 
-                                   (res, t['order_code'], t['line_number']))
+                    cursor.execute("UPDATE trabajos SET estado_tapa_produccion = 'GENERADO', ruta_archivo_tapa = ?, papel_tapa_size = ? WHERE order_code = ? AND line_number = ?", 
+                                   (ruta_f, ps, t['order_code'], t['line_number']))
                     conn.commit(); conn.close()
                     print(f"  ✅ Tapa {t['order_code']} OK")
                     
@@ -242,7 +243,7 @@ def run():
                     try:
                         if odoo_api and t.get('odoo_sale_order_id'):
                             so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
-                            so.message_post(body=f"✅ **Producción Tapa:** Generada correctamente.\nArchivo: `{os.path.basename(res)}`")
+                            so.message_post(body=f"✅ **Producción Tapa:** Generada correctamente.\nArchivo: `{os.path.basename(ruta_f)}`")
                     except: pass
                 else:
                     # Marcar como error en la DB para no trabar el loop
