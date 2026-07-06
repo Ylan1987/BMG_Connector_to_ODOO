@@ -284,19 +284,7 @@ def run():
             continue
         # <<< FIN: Omitir OF para trabajos de producción externa >>>
 
-        # --- Obtener la imagen de la tapa en base64 ---
-        cover_image_base64 = None
-        ruta_tapa_pdf = trabajo.get('ruta_archivo_tapa')
-        if ruta_tapa_pdf:
-            _logger.info(f"  - Intentando extraer imagen de tapa para OF principal desde: {ruta_tapa_pdf}")
-            cover_image_base64 = extract_image_from_pdf(ruta_tapa_pdf)
-            if cover_image_base64:
-                _logger.info("    -> ✅ Imagen de tapa extraída y codificada en base64.")
-            else:
-                _logger.warning("    -> ⚠️ No se pudo extraer la imagen de tapa para la OF principal.")
-        else:
-            _logger.warning("    -> ⚠️ ruta_archivo_tapa no está disponible en el trabajo para la OF principal.")
-        # --- FIN: Obtener la imagen de la tapa en base64 ---
+        # <<< FIN: Omitir OF para trabajos de producción externa >>>
 
         try:
             # 1. OBTENER PRODUCTO FINAL Y DETERMINAR FLUJO
@@ -688,20 +676,6 @@ def run():
 
                             _logger.info(f"      -> Asignando datos (Line Number, Nombre) a OF hija {of_id}...")
                             of_record.write(write_vals) # Update name and custom line field on mrp.production
-
-                            # --- Actualizar x_image en mrp.workorder(s) asociadas a esta OF ---
-                            if cover_image_base64:
-                                workorder_ids = odoo_api.env['mrp.workorder'].search([('production_id', '=', of_id)])
-                                if workorder_ids:
-                                    for wo_id in workorder_ids:
-                                        try:
-                                            odoo_api.env['mrp.workorder'].browse(wo_id).write({'x_image': cover_image_base64})
-                                            _logger.info(f"        -> ✅ Imagen de tapa asignada a Work Order {wo_id} de OF {of_id}.")
-                                        except Exception as wo_e:
-                                            _logger.error(f"        -> ❌ Error al asignar imagen a Work Order {wo_id} de OF {of_id}: {wo_e}")
-                                else:
-                                    _logger.warning(f"        -> ⚠️ No se encontraron Work Orders para OF {of_id} para asignar imagen.")
-                            # --- FIN: Actualizar x_image en mrp.workorder(s) ---
 
                             _logger.info(f"      -> Confirmando OF {of_id} ({of_record.product_id.name})...")
                             of_record.action_confirm()

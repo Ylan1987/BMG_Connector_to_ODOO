@@ -542,14 +542,14 @@ def run():
                             
                             attachment_ids = []
                             b64_tapa = t.get('b64_tapa')
-                            if b64_tapa:
+                            if b64_tapa and t.get('odoo_sale_order_line_id'):
                                 try:
                                     att = odoo_api.env['ir.attachment'].create({
-                                        'name': "tapa-miniatura.png",
+                                        'name': f"tapa-miniatura-{t['order_code']}.png",
                                         'type': 'binary',
                                         'datas': b64_tapa,
-                                        'res_model': 'sale.order',
-                                        'res_id': t['odoo_sale_order_id'],
+                                        'res_model': 'sale.order.line',
+                                        'res_id': t['odoo_sale_order_line_id'],
                                         'mimetype': 'image/png'
                                     })
                                     attachment_ids.append(att)
