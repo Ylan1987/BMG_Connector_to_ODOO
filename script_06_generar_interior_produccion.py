@@ -597,7 +597,7 @@ def run():
                                     print(f"      ADVERTENCIA: No se pudo subir el adjunto a Odoo: {e_att}")
                                     
                             so.message_post(
-                                body=f"✅ **Producción Interior:** Generado correctamente.\nArchivos: `{', '.join([os.path.basename(r) for r in res])}`",
+                                body=f"✅ **Producción Interior:** Generado correctamente.\nArchivos: `{', '.join([os.path.basename(r) for r in rutas_guardadas])}`",
                                 attachment_ids=attachment_ids
                             )
                     except Exception as e_chatter:
