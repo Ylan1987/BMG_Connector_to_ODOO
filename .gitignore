@@ -9,3 +9,4 @@ logs_chat_historial/
 chat20260608
 .gemini/
 .env
+common/mapeos_local.py
