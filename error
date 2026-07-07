@@ -1,4 +1,81 @@
-Te fuiste al modulo de taller, pero eso lo tenias que hacer en V2.0, Cuando generamos el niterior y la tapa, les agregamos un codigo de barra, ese es el que necesitaba mas grande, por lo menos el doble de largo y el alto correspodniente a ese doble de largo.
+Ahora quiero que revises todas estas, pueden o no tener la imagen porque hay algunas que la tapa todavia no esta disponible, así que mas cuidado en el script
+P80467
+P80466
+P80465
+P80464
+P80463
+P80459
+P80458
+P80457
+P80456
+P80455
+P80454
+P80453
+P80452
+P80451
+P80450
+P80449
+P80448
+P80447
+P80446
+P80444
+P80437
+P80436
+P80434
+P80429
+P80426
+P80425
+P80424
+P80423
+P80422
+P80416
+P80415
+P80412
+P80411
+P80410
+P80409
+P80408
+P80407
+P80406
+P80403
+P80402
+P80401
+P80399
+P80398
+P80397
+P80396
+P80395
+P80394
+P80391
+P80390
+P80389
+P80388
+P80387
+P80386
+P80385
+P80384
+P80383
+P80382
+P80381
+P80380
+P80379
+P80378
+P80377
+P80376
+P80375
+P80374
+P80373
+P80372
+P80371
+P80370
+P80369
+P80368
+P80367
+P80366
 
-Al intentar procesar un lote de impresion de tapas, me da este error
-Error al procesar el lote: La fecha de finalización planeada de la orden de trabajo no puede ser anterior a la fecha de inicio planeada, corríjala para guardar la orden de trabajo.
+
+
+
+P80391 estan todas en orden, salvo la -10 que no esta, de la 9 pasas a la 11
+P80402 P80434 P80450 esta nen orden
+Todas las otras entra a fijarte bien, porque muchas tienen una linea sola, la de envio no importa, vos tenes que fijarte cuantas lineas hay con bmg order line y que haya una sola. Volve a revisar eso y pasame un listado nuevo de las que falten hacer de mas de una linea (sin ser las que ya te dije aca como son)

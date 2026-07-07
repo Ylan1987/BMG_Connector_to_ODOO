@@ -150,7 +150,8 @@ def procesar_tapa(trabajo_actual):
         if laminado:
             doc[0].insert_text(fitz.Point(trim.x0, y_base), f"Laminado: {laminado}", fontsize=10)
         
-        barcode_text = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
+        base_barcode = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
+        barcode_text = f"{base_barcode}-{trabajo_actual.get('line_number')}" if base_barcode else None
         if barcode_text:
             try:
                 import io

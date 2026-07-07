@@ -167,7 +167,8 @@ def crear_pagina_orden_de_trabajo(trabajo_actual):
                 except Exception as e:
                     print(f"      ADVERTENCIA: No se pudo insertar la imagen de la tapa recortada. Error: {e}")
 
-        barcode_text = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
+        base_barcode = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
+        barcode_text = f"{base_barcode}-{trabajo_actual.get('line_number')}" if base_barcode else None
         if barcode_text:
             try:
                 import io
@@ -586,7 +587,7 @@ def run():
                             if b64_tapa and t.get('odoo_sale_order_line_id'):
                                 try:
                                     att = odoo_api.env['ir.attachment'].create({
-                                        'name': f"tapa-miniatura-{t['order_code']}.png",
+                                        'name': f"tapa-miniatura-{t['order_code']}-{t['line_number']}.png",
                                         'type': 'binary',
                                         'datas': b64_tapa,
                                         'res_model': 'sale.order.line',
