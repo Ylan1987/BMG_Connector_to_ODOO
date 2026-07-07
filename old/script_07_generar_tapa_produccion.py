@@ -119,74 +119,31 @@ def encontrar_archivo_mas_reciente(directorio, title_id_limpio, tipo_archivo, or
     except: return None, "Error al listar el directorio en el NAS."
 
 def procesar_tapa(trabajo_actual):
-    oc = trabajo_actual.get('order_code')
-    ln = trabajo_actual.get('line_number')
-    tid = trabajo_actual.get('title_id')
-    print(f"    Procesando TAPA -> Pedido: {oc} | Línea: {ln} | TitleID: {tid}")
+    print("    Procesando TAPA...")
     ruta_orig = trabajo_actual['ruta_archivo_tapa_original']
-    doc = None
     try:
         doc = fitz.open(ruta_orig)
         cajas = obtener_cajas_normalizadas_pypdf(ruta_orig)
-        if not cajas: 
-            doc.close()
-            return None
+        if not cajas: return None
         trim = cajas['trim']
-        
-        # --- NUEVO: Agrandar el lienzo (MediaBox) si no hay espacio arriba ---
-        media = doc[0].mediabox
-        espacio_arriba = trim.y0 - media.y0
-        espacio_necesario = 100  # Queremos al menos 100 puntos de margen superior para acomodar el barcode grande
-        if espacio_arriba < espacio_necesario:
-            falta = espacio_necesario - espacio_arriba
-            nuevo_media = fitz.Rect(media.x0, media.y0 - falta, media.x1, media.y1)
-            doc[0].set_mediabox(nuevo_media)
-            doc[0].set_cropbox(nuevo_media)
-            # Como expandimos el lienzo hacia arriba, y_base ya no tiene riesgo de ser negativo
-        # ---------------------------------------------------------------------
-            
         laminado = trabajo_actual.get('laminate')
-        y_base = max(20, trim.y0-28)
         if laminado:
-            doc[0].insert_text(fitz.Point(trim.x0, y_base), f"Laminado: {laminado}", fontsize=10)
-        
-        barcode_text = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
-        if barcode_text:
-            try:
-                import io
-                from barcode import Code128
-                from barcode.writer import ImageWriter
-                buffer = io.BytesIO()
-                Code128(barcode_text, writer=ImageWriter()).write(buffer, options={'write_text': False})
-                
-                # Lo alineamos por debajo con la leyenda de laminado (y_base)
-                y_bottom = y_base
-                y_top = y_bottom - 60
-                barcode_rect = fitz.Rect(trim.x0 + 150, y_top, trim.x0 + 150 + 500, y_bottom)
-                doc[0].insert_image(barcode_rect, stream=buffer.getvalue(), keep_proportion=True)
-            except Exception as e:
-                print(f"      ADVERTENCIA: No se pudo insertar el código de barras en la tapa. Error: {e}")
+            doc[0].insert_text(fitz.Point(trim.x0, max(20, trim.y0-28)), f"Laminado: {laminado}", fontsize=10)
         
         fw, fh = (trim.width + 2*BLEED_PTS)*MM_PER_POINT, (trim.height + 2*BLEED_PTS)*MM_PER_POINT
         ps = ""
         if (fw<=320 and fh<=350) or (fh<=320 and fw<=350): ps = "33x36"
         elif (fw<=320 and fh<=470) or (fh<=320 and fw<=470): ps = "33x48.7"
         elif (fw<=320 and fh<=690) or (fh<=320 and fw<=690): ps = "33x70"
-        else: 
-            doc.close()
-            return None
+        else: return None
 
         oc = limpiar_id(trabajo_actual['order_code'], 'PED')
         tit = re.sub(r'[\\/*?:"<>|]', "", trabajo_actual['title'])[:50]
         nom = f"{oc}-{trabajo_actual['line_number']}_{ps}x{trabajo_actual['quantity_requested']}_{tit}.pdf"
         ruta_f = os.path.join(mapeos.DEST_PATH_TAPAS, nom)
-        doc.save(ruta_f)
-        doc.close()
-        return ruta_f, ps
-    except Exception as e:
-        print(f"      ERROR procesando tapa: {e}")
-        if doc: doc.close()
-        return None
+        doc.save(ruta_f); doc.close()
+        return ruta_f
+    except: return None
 
 def run():
     if not mapeos.PROCESAR_PDF_ACTIVADO: return
@@ -233,10 +190,9 @@ def run():
                 t['ruta_archivo_tapa_original'] = r_orig
                 res = procesar_tapa(t)
                 if res:
-                    ruta_f, ps = res
                     conn = db_conn.conectar_db(); cursor = conn.cursor()
-                    cursor.execute("UPDATE trabajos SET estado_tapa_produccion = 'GENERADO', ruta_archivo_tapa = ?, papel_tapa_size = ? WHERE order_code = ? AND line_number = ?", 
-                                   (ruta_f, ps, t['order_code'], t['line_number']))
+                    cursor.execute("UPDATE trabajos SET estado_tapa_produccion = 'GENERADO', ruta_archivo_tapa = ? WHERE order_code = ? AND line_number = ?", 
+                                   (res, t['order_code'], t['line_number']))
                     conn.commit(); conn.close()
                     print(f"  ✅ Tapa {t['order_code']} OK")
                     
@@ -244,23 +200,10 @@ def run():
                     try:
                         if odoo_api and t.get('odoo_sale_order_id'):
                             so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
-                            so.message_post(body=f"✅ **Producción Tapa:** Generada correctamente.\nArchivo: `{os.path.basename(ruta_f)}`")
-                    except: pass
-                else:
-                    # Marcar como error en la DB para no trabar el loop
-                    conn = db_conn.conectar_db(); cursor = conn.cursor()
-                    cursor.execute("UPDATE trabajos SET estado_tapa_produccion = 'ERROR' WHERE order_code = ? AND line_number = ?", 
-                                   (t['order_code'], t['line_number']))
-                    conn.commit(); conn.close()
-                    print(f"  ❌ Error al procesar Tapa {t['order_code']}")
-                    try:
-                        if odoo_api and t.get('odoo_sale_order_id'):
-                            so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
-                            body = f"⚠️ **Producción Tapa:** Error al procesar archivo físico (medidas incorrectas o archivo dañado).\nTitleID: {tid}"
-                            so.message_post(body=body)
+                            so.message_post(body=f"✅ **Producción Tapa:** Generada correctamente.\nArchivo: `{os.path.basename(res)}`")
                     except: pass
             else:
-                # Notificar fallo detallado (no se encontró archivo apto, se mantiene en PENDIENTE)
+                # Notificar fallo detallado
                 try:
                     if odoo_api and t.get('odoo_sale_order_id'):
                         so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])

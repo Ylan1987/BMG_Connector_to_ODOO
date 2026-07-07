@@ -1,0 +1,55 @@
+<t t-name="studio_report_document">
+    <div class="page">
+        <div class="oe_structure"/>
+        <t t-foreach="[1, 2, 3, 4, 5, 6, 7, 8,9,10,11,12]" t-as="i">
+            <div class="row border border-1 p-0" style="height: 49.5mm;">
+                <div class="col-12 h-100 py-1" style="padding-left:55mm; padding-top:3mm">
+                    <div class="card h-100 px-1 border-0" style="width: 100mm;">
+                        <div class="card-body p-0">
+                            <t t-if="doc.sale_order_id">
+                                <div class="row pb-2" style="height: 50%;">
+                                    <div class="col-8 px-0">
+                                        <h2 class="m-0 p-0">
+                                            <span t-if="doc.sale_order_id" t-field="doc.sale_order_id.name" class="fw-bold">P00001</span>
+                                        </h2>
+                                        <p class="m-0 p-0">
+                                            <small>
+                                                <span t-esc="doc.sale_order_id.partner_id.display_name[:40]" class="fw-bold">Cliente</span>
+                                            </small>
+                                        </p>
+                                        <p class="m-0 p-0 w-100">
+                                            <small>
+                                                <span t-esc="'%sx %s' %(int(doc.sale_order_id.order_line[0].product_uom_qty), doc.sale_order_id.order_line[0].name[:25])" class="font-monospace">descripcion</span>
+                                            </small>
+                                        </p>
+                                    </div>
+                                    <div class="col-4 d-flex px-0 justify-content-end align-items-center">
+                                        <img class="img-fluid" t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s'%('QR', quote_plus('%s/web?#id=%s&amp;model=project.task&amp;view_type=form' %(web_base_url.replace('http://', 'https://'),doc._origin.id)), 80, 80)"/>
+                                    </div>
+                                </div>
+                                <div class="row border border-1 bg-light" style="height: 20mm;">
+                                    <div class="col-6 border-end">
+                                        <small>
+                                            <div class="w-100 p-2">CONTIENE</div>
+                                        </small>
+                                    </div>
+                                    <div class="col-6 bg-light">
+                                        <small>
+                                            <div class="w-100 p-2">TOTAL</div>
+                                        </small>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-if="not doc.sale_order_id">
+                                <div class="alert alert-danger my-2">
+                                    <h3>Esta tarea no está asociada a una orden de venta</h3>
+                                    <h5 class="text-dark py-2">Por favor imprimir las etiquetas <strong>desde la tarea directamente asociada con la venta</strong></h5>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </div>
+</t>

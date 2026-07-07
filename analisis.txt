@@ -1,0 +1,47 @@
+OF Generadas: 126
+
+ERRORES:
+- 112 veces: Cliente con Publisher ID 'XX' (Editor) NO EXISTE en Odoo.
+  (Ejemplo: Cliente con Publisher ID '108749' (Editor) NO EXISTE en Odoo.)
+- 1629 veces: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se pudo determinar el tamaño de papel de tapa desde el trabajo.
+  (Ejemplo: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se pudo determinar el tamaño de papel de tapa desde el trabajo.)
+- 1 veces: procesando tapa: CropBox not in MediaBox
+  (Ejemplo: procesando tapa: CropBox not in MediaBox)
+- 1 veces: Tapa PED_XX
+  (Ejemplo: Tapa PED00662823)
+- 170 veces: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontró el producto de cartulina 'Papel Cartulina CMPC 250gr 33.0x36.0cm' en Odoo.
+  (Ejemplo: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontró el producto de cartulina 'Papel Cartulina CMPC 250gr 33.0x36.0cm' en Odoo.)
+- 121 veces: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontró el producto de cartulina 'Papel Cartulina CMPC 250gr 33.0x70.0cm' en Odoo.
+  (Ejemplo: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontró el producto de cartulina 'Papel Cartulina CMPC 250gr 33.0x70.0cm' en Odoo.)
+- 40 veces: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontró el producto de cartulina 'Papel Cartulina CMPC 250gr 33.0x48.7cm' en Odoo.
+  (Ejemplo: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontró el producto de cartulina 'Papel Cartulina CMPC 250gr 33.0x48.7cm' en Odoo.)
+- 136 veces: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontraron datos de layout o papel de interior en el trabajo.
+  (Ejemplo: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontraron datos de layout o papel de interior en el trabajo.)
+- 1 veces: | root                 | Traceback (most recent call last):
+  (Ejemplo: | root                 | Traceback (most recent call last):)
+- 1 veces: | root                 | File "/app/actualizar_layouts_db.py", line 73, in <module>
+  (Ejemplo: | root                 | File "/app/actualizar_layouts_db.py", line 73, in <module>)
+- 1 veces: | root                 | actualizar_layouts()
+  (Ejemplo: | root                 | actualizar_layouts())
+- 1 veces: | root                 | File "/app/actualizar_layouts_db.py", line 17, in actualizar_layouts
+  (Ejemplo: | root                 | File "/app/actualizar_layouts_db.py", line 17, in actualizar_layouts)
+- 1 veces: | root                 | cursor.execute("""
+  (Ejemplo: | root                 | cursor.execute(""")
+- 1 veces: | root                 | sqlite3
+  (Ejemplo: | root                 | sqlite3)
+- 1 veces: | root                 | .
+  (Ejemplo: | root                 | .)
+- 1 veces: | root                 | OperationalError
+  (Ejemplo: | root                 | OperationalError)
+- 1 veces: | root                 | :
+  (Ejemplo: | root                 | :)
+- 1 veces: | root                 | no such column: id
+  (Ejemplo: | root                 | no such column: id)
+- 1 veces: | script_02_actualizar_estados_bmg | Error al crear registro en bmg.notification.queue para Pedido BMG PED_XX, Estado BMG 9: 'int' object has no attribute 'id'
+  (Ejemplo: | script_02_actualizar_estados_bmg | Error al crear registro en bmg.notification.queue para Pedido BMG PED00663483-1, Estado BMG 9: 'int' object has no attribute 'id')
+- 2 veces: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontró el producto de papel cortado 'Papel Coteado 115gr 23.0x32.0cm' en Odoo.
+  (Ejemplo: | script_05_crear_ordenes_fabricacion |     ❌ Error: No se encontró el producto de papel cortado 'Papel Coteado 115gr 23.0x32.0cm' en Odoo.)
+- 2 veces: | script_05_crear_ordenes_fabricacion |   -> ❌❌ ERROR DETALLADO en Script 05: HTTP Error 502: Bad Gateway ❌❌
+  (Ejemplo: | script_05_crear_ordenes_fabricacion |   -> ❌❌ ERROR DETALLADO en Script 05: HTTP Error 502: Bad Gateway ❌❌)
+- 1 veces: | script_05_crear_ordenes_fabricacion |     ❌ Error al confirmar la OF principal 127: HTTP Error 502: Bad Gateway
+  (Ejemplo: | script_05_crear_ordenes_fabricacion |     ❌ Error al confirmar la OF principal 127: HTTP Error 502: Bad Gateway)

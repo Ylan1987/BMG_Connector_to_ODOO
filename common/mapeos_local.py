@@ -9,7 +9,7 @@ DB_FILE = 'trabajos.db'
 
 # --- CONFIGURACIÓN DE ODOO (Producción) ---
 # Completa estos valores con los datos de tu servidor de producción.
-ODOO_URL = 'testkrl.odoo.imprentadiagonal.com.uy'
+ODOO_URL = 'prod17.odoo.imprentadiagonal.com.uy'
 ODOO_DB = 'odoo17_prod'
 ODOO_USUARIO = 'ylan.archimowicz@imprentadiagonal.com.uy'
 #Para prod

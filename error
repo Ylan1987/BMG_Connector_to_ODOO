@@ -1,0 +1,4 @@
+Te fuiste al modulo de taller, pero eso lo tenias que hacer en V2.0, Cuando generamos el niterior y la tapa, les agregamos un codigo de barra, ese es el que necesitaba mas grande, por lo menos el doble de largo y el alto correspodniente a ese doble de largo.
+
+Al intentar procesar un lote de impresion de tapas, me da este error
+Error al procesar el lote: La fecha de finalización planeada de la orden de trabajo no puede ser anterior a la fecha de inicio planeada, corríjala para guardar la orden de trabajo.

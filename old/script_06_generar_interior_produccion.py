@@ -116,70 +116,15 @@ def crear_pagina_orden_de_trabajo(trabajo_actual):
             use_builtin_fonts = True
 
         rect_img = fitz.Rect(margen, margen, A4[0] - margen, A4[1] / 2)
-        
-        # 1. Intentar usar IMAGEN_TAPA_G desde la ruta original (ruta_trabajo)
-        import glob
-        rt = trabajo_actual.get('ruta_trabajo')
-        jpg_tapa_path = None
-        if rt and os.path.exists(rt):
-            jpgs = glob.glob(os.path.join(rt, '*IMAGEN_TAPA_G*.jpg'))
-            if jpgs:
-                # Si hay varios, ordenar por fecha de modificación y quedarse con el más nuevo
-                jpgs.sort(key=os.path.getmtime, reverse=True)
-                jpg_tapa_path = jpgs[0]
-        
-        if jpg_tapa_path:
+        ruta_tapa = trabajo_actual.get('ruta_archivo_tapa')
+        if ruta_tapa and os.path.exists(ruta_tapa):
             try:
-                import base64
-                with open(jpg_tapa_path, 'rb') as f:
-                    img_data = f.read()
-                page.insert_image(rect_img, stream=img_data, keep_proportion=True)
-                trabajo_actual['b64_tapa'] = base64.b64encode(img_data).decode('utf-8')
+                with fitz.open(ruta_tapa) as doc_tapa:
+                    if doc_tapa.page_count > 0:
+                        pix_tapa = doc_tapa[0].get_pixmap()
+                        page.insert_image(rect_img, pixmap=pix_tapa, keep_proportion=True)
             except Exception as e:
-                print(f"      ADVERTENCIA: No se pudo cargar IMAGEN_TAPA_G. Error: {e}")
-        else:
-            # 2. Si no existe el JPG, hacer el recorte del PDF original (Fallback)
-            ruta_tapa = trabajo_actual.get('ruta_archivo_tapa')
-            if ruta_tapa and os.path.exists(ruta_tapa):
-                try:
-                    import base64
-                    with fitz.open(ruta_tapa) as doc_tapa:
-                        if doc_tapa.page_count > 0:
-                            page_tapa = doc_tapa[0]
-                            trimbox = page_tapa.trimbox
-                            
-                            solapa_mm = float(str(trabajo_actual.get('flaps_width') or 0).replace(',', '.'))
-                            ancho_mm = float(str(trabajo_actual.get('width') or 0).replace(',', '.'))
-                            
-                            solapa_pts = solapa_mm * 2.83465
-                            ancho_pts = ancho_mm * 2.83465
-                            
-                            x1 = trimbox.x1 - solapa_pts
-                            x0 = x1 - ancho_pts
-                            
-                            clip_rect = fitz.Rect(x0, trimbox.y0, x1, trimbox.y1)
-                            pix_tapa = page_tapa.get_pixmap(clip=clip_rect)
-                            
-                            page.insert_image(rect_img, pixmap=pix_tapa, keep_proportion=True)
-                            
-                            img_data = pix_tapa.tobytes("png")
-                            trabajo_actual['b64_tapa'] = base64.b64encode(img_data).decode('utf-8')
-                except Exception as e:
-                    print(f"      ADVERTENCIA: No se pudo insertar la imagen de la tapa recortada. Error: {e}")
-
-        barcode_text = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
-        if barcode_text:
-            try:
-                import io
-                from barcode import Code128
-                from barcode.writer import ImageWriter
-                buffer = io.BytesIO()
-                Code128(barcode_text, writer=ImageWriter()).write(buffer, options={'write_text': False})
-                # El doble de largo y alto
-                barcode_rect = fitz.Rect((A4[0]-300)/2, margen+5, (A4[0]+300)/2, margen+55)
-                page.insert_image(barcode_rect, stream=buffer.getvalue(), keep_proportion=True)
-            except Exception as e:
-                print(f"      ADVERTENCIA: No se pudo insertar el código de barras. Error: {e}")
+                print(f"      ADVERTENCIA: No se pudo insertar la imagen de la tapa. Error: {e}")
 
         y = A4[1] / 2 + 20
 
@@ -300,18 +245,12 @@ def dibujar_lineas_de_corte(page, trim_box, posicion):
         page.draw_line(fitz.Point(x1 + offset, y1), fitz.Point(x1 + offset + longitud_marca, y1), color=color_corte, width=0.25)
 
 def procesar_interior(trabajo_actual):
-    oc = trabajo_actual.get('order_code')
-    ln = trabajo_actual.get('line_number')
-    tid = trabajo_actual.get('title_id')
-    print(f"    Procesando INTERIOR -> Pedido: {oc} | Línea: {ln} | TitleID: {tid}")
-    
     doc_orden_trabajo = crear_pagina_orden_de_trabajo(trabajo_actual)
     if not doc_orden_trabajo:
         print("    ERROR: Se canceló el procesamiento del interior porque no se pudo generar la orden de trabajo.")
         return None
 
     ruta_orig = trabajo_actual['ruta_archivo_contenido']
-    doc = None
     try:
         doc = fitz.open(ruta_orig)
         if doc.page_count == 0:
@@ -524,10 +463,9 @@ def procesar_interior(trabajo_actual):
         
         imposed_doc.close()
 
-        return rutas_guardadas, layout, papel_folder, copias
+        return rutas_guardadas
     except Exception as e:
-        print(f"      ERROR procesando interior: {e}")
-        if doc: doc.close()
+        print(f"Error procesando interior: {e}")
         return None
 
 def run():
@@ -553,10 +491,7 @@ def run():
         if conn:
             conn.close()
     
-    print(f"Se encontraron {len(trabajos)} trabajos con interior 'pendiente' en la base de datos local.")
-    
     if not trabajos:
-        print("No hay archivos interiores pendientes por generar. Saliendo del Script 6.")
         return
 
     odoo_api = odoo_conn.conectar_odoo() if trabajos else None
@@ -570,51 +505,16 @@ def run():
                 t['ruta_archivo_contenido'] = r_orig
                 res = procesar_interior(t)
                 if res:
-                    rutas_guardadas, layout, papel_folder, copias = res
                     conn = db_conn.conectar_db(); cursor = conn.cursor()
-                    cursor.execute("UPDATE trabajos SET estado_interior_produccion = 'GENERADO', ruta_archivo_contenido = ?, interior_layout = ?, interior_papel_folder = ?, copias_calculadas = ? WHERE order_code = ? AND line_number = ?", 
-                                   (rutas_guardadas[0], layout, papel_folder, copias, t['order_code'], t['line_number']))
+                    cursor.execute("UPDATE trabajos SET estado_interior_produccion = 'GENERADO', ruta_archivo_contenido = ? WHERE order_code = ? AND line_number = ?", 
+                                   (res[0], t['order_code'], t['line_number']))
                     conn.commit(); conn.close()
                     print(f"  ✅ Interior {t['order_code']} OK")
                     
                     try:
                         if odoo_api and t.get('odoo_sale_order_id'):
                             so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
-                            
-                            attachment_ids = []
-                            b64_tapa = t.get('b64_tapa')
-                            if b64_tapa and t.get('odoo_sale_order_line_id'):
-                                try:
-                                    att = odoo_api.env['ir.attachment'].create({
-                                        'name': f"tapa-miniatura-{t['order_code']}.png",
-                                        'type': 'binary',
-                                        'datas': b64_tapa,
-                                        'res_model': 'sale.order.line',
-                                        'res_id': t['odoo_sale_order_line_id'],
-                                        'mimetype': 'image/png'
-                                    })
-                                    attachment_ids.append(att)
-                                except Exception as e_att:
-                                    print(f"      ADVERTENCIA: No se pudo subir el adjunto a Odoo: {e_att}")
-                                    
-                            so.message_post(
-                                body=f"✅ **Producción Interior:** Generado correctamente.\nArchivos: `{', '.join([os.path.basename(r) for r in rutas_guardadas])}`",
-                                attachment_ids=attachment_ids
-                            )
-                    except Exception as e_chatter:
-                        print(f"      ERROR AL ESCRIBIR EN EL CHATTER DE ODOO: {e_chatter}")
-                else:
-                    # Marcar como error en la DB para no trabar el loop
-                    conn = db_conn.conectar_db(); cursor = conn.cursor()
-                    cursor.execute("UPDATE trabajos SET estado_interior_produccion = 'ERROR' WHERE order_code = ? AND line_number = ?", 
-                                   (t['order_code'], t['line_number']))
-                    conn.commit(); conn.close()
-                    print(f"  ❌ Error al procesar Interior {t['order_code']}")
-                    try:
-                        if odoo_api and t.get('odoo_sale_order_id'):
-                            so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
-                            body = f"⚠️ **Producción Interior:** Error al procesar archivo físico (medidas incorrectas o archivo dañado).\nTitleID: {tid}"
-                            so.message_post(body=body)
+                            so.message_post(body=f"✅ **Producción Interior:** Generado correctamente.\nArchivos: `{', '.join([os.path.basename(r) for r in res])}`")
                     except: pass
             else:
                 try:

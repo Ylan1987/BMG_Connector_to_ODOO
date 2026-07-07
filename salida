@@ -1,0 +1,508 @@
+2026-07-03 16:40:26,949 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:27,144 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:27,153 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662169.
+2026-07-03 16:40:27,154 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662169.
+2026-07-03 16:40:27,155 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662170
+2026-07-03 16:40:27,156 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:27,347 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:27,359 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662170.
+2026-07-03 16:40:27,359 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662170.
+2026-07-03 16:40:27,360 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662345
+2026-07-03 16:40:27,361 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:27,741 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:27,755 | INFO     | root                 | -> Estado actualizado para 21 líneas del pedido PED00662345.
+2026-07-03 16:40:27,756 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662345.
+2026-07-03 16:40:27,757 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662364
+2026-07-03 16:40:27,757 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:27,949 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:27,959 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662364.
+2026-07-03 16:40:27,960 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662364.
+2026-07-03 16:40:27,961 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662376
+2026-07-03 16:40:27,961 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,147 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,157 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662376.
+2026-07-03 16:40:28,158 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662376.
+2026-07-03 16:40:28,159 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662386
+2026-07-03 16:40:28,160 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,351 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,363 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662386.
+2026-07-03 16:40:28,363 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662386.
+2026-07-03 16:40:28,364 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662403
+2026-07-03 16:40:28,365 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,551 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,561 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662403.
+2026-07-03 16:40:28,561 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662403.
+2026-07-03 16:40:28,562 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662407
+2026-07-03 16:40:28,563 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,755 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,765 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662407.
+2026-07-03 16:40:28,766 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662407.
+2026-07-03 16:40:28,768 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662411
+2026-07-03 16:40:28,769 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,955 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:28,963 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662411.
+2026-07-03 16:40:28,964 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662411.
+2026-07-03 16:40:28,965 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662430
+2026-07-03 16:40:28,965 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,154 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,164 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662430.
+2026-07-03 16:40:29,165 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662430.
+2026-07-03 16:40:29,166 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662432
+2026-07-03 16:40:29,167 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,363 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,373 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662432.
+2026-07-03 16:40:29,373 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662432.
+2026-07-03 16:40:29,374 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662434
+2026-07-03 16:40:29,375 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,563 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,576 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662434.
+2026-07-03 16:40:29,579 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662434.
+2026-07-03 16:40:29,582 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662436
+2026-07-03 16:40:29,585 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,773 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,782 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662436.
+2026-07-03 16:40:29,783 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662436.
+2026-07-03 16:40:29,783 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662439
+2026-07-03 16:40:29,784 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,980 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:29,990 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662439.
+2026-07-03 16:40:29,990 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662439.
+2026-07-03 16:40:29,991 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662441
+2026-07-03 16:40:29,992 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:30,179 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:30,188 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662441.
+2026-07-03 16:40:30,188 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662441.
+2026-07-03 16:40:30,189 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662444
+2026-07-03 16:40:30,190 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:30,388 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:30,397 | INFO     | root                 | -> Estado actualizado para 2 líneas del pedido PED00662444.
+2026-07-03 16:40:30,398 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662444.
+2026-07-03 16:40:30,399 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662458
+2026-07-03 16:40:30,400 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:30,681 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:30,694 | INFO     | root                 | -> Estado actualizado para 13 líneas del pedido PED00662458.
+2026-07-03 16:40:30,695 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662458.
+2026-07-03 16:40:30,695 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662504
+2026-07-03 16:40:30,696 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:30,884 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:30,894 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662504.
+2026-07-03 16:40:30,895 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662504.
+2026-07-03 16:40:30,895 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662561
+2026-07-03 16:40:30,899 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,141 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,154 | INFO     | root                 | -> Estado actualizado para 8 líneas del pedido PED00662561.
+2026-07-03 16:40:31,155 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662561.
+2026-07-03 16:40:31,156 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662564
+2026-07-03 16:40:31,157 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,349 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,362 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662564.
+2026-07-03 16:40:31,362 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662564.
+2026-07-03 16:40:31,363 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662603
+2026-07-03 16:40:31,364 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,560 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,571 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662603.
+2026-07-03 16:40:31,572 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662603.
+2026-07-03 16:40:31,573 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662604
+2026-07-03 16:40:31,574 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,764 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,773 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662604.
+2026-07-03 16:40:31,773 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662604.
+2026-07-03 16:40:31,774 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662606
+2026-07-03 16:40:31,775 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,968 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:31,977 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662606.
+2026-07-03 16:40:31,977 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662606.
+2026-07-03 16:40:31,978 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662610
+2026-07-03 16:40:31,979 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,164 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,173 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662610.
+2026-07-03 16:40:32,174 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662610.
+2026-07-03 16:40:32,174 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662624
+2026-07-03 16:40:32,175 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,363 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,372 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662624.
+2026-07-03 16:40:32,373 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662624.
+2026-07-03 16:40:32,373 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662625
+2026-07-03 16:40:32,374 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,563 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,573 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662625.
+2026-07-03 16:40:32,574 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662625.
+2026-07-03 16:40:32,575 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662631
+2026-07-03 16:40:32,575 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,760 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,769 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662631.
+2026-07-03 16:40:32,769 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662631.
+2026-07-03 16:40:32,770 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662657
+2026-07-03 16:40:32,771 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,961 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:32,970 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662657.
+2026-07-03 16:40:32,971 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662657.
+2026-07-03 16:40:32,972 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662666
+2026-07-03 16:40:32,972 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:33,167 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:33,178 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662666.
+2026-07-03 16:40:33,179 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662666.
+2026-07-03 16:40:33,179 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662670
+2026-07-03 16:40:33,180 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:33,374 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:33,385 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662670.
+2026-07-03 16:40:33,388 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662670.
+2026-07-03 16:40:33,391 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662692
+2026-07-03 16:40:33,393 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:33,589 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:33,599 | INFO     | root                 | -> Estado actualizado para 2 líneas del pedido PED00662692.
+2026-07-03 16:40:33,600 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662692.
+2026-07-03 16:40:33,602 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662694
+2026-07-03 16:40:33,603 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:33,793 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:33,804 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662694.
+2026-07-03 16:40:33,804 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662694.
+2026-07-03 16:40:33,805 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662701
+2026-07-03 16:40:33,806 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:33,995 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:34,005 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662701.
+2026-07-03 16:40:34,006 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662701.
+2026-07-03 16:40:34,007 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662710
+2026-07-03 16:40:34,008 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:34,194 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:34,203 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662710.
+2026-07-03 16:40:34,204 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662710.
+2026-07-03 16:40:34,205 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662837
+2026-07-03 16:40:34,206 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:34,421 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:34,437 | INFO     | root                 | -> Estado actualizado para 5 líneas del pedido PED00662837.
+2026-07-03 16:40:34,440 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662837.
+2026-07-03 16:40:34,443 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662840
+2026-07-03 16:40:34,446 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:34,634 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:34,644 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662840.
+2026-07-03 16:40:34,644 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662840.
+2026-07-03 16:40:34,645 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662885
+2026-07-03 16:40:34,646 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:34,854 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:34,864 | INFO     | root                 | -> Estado actualizado para 3 líneas del pedido PED00662885.
+2026-07-03 16:40:34,865 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662885.
+2026-07-03 16:40:34,866 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662887
+2026-07-03 16:40:34,866 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,063 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,101 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662887.
+2026-07-03 16:40:35,102 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662887.
+2026-07-03 16:40:35,102 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662888
+2026-07-03 16:40:35,103 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,290 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,308 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662888.
+2026-07-03 16:40:35,309 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662888.
+2026-07-03 16:40:35,310 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662914
+2026-07-03 16:40:35,311 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,499 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,508 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662914.
+2026-07-03 16:40:35,509 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662914.
+2026-07-03 16:40:35,510 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662919
+2026-07-03 16:40:35,510 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,701 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,710 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662919.
+2026-07-03 16:40:35,711 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662919.
+2026-07-03 16:40:35,712 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662921
+2026-07-03 16:40:35,712 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,907 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:35,917 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662921.
+2026-07-03 16:40:35,918 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662921.
+2026-07-03 16:40:35,919 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662939
+2026-07-03 16:40:35,920 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,111 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,120 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662939.
+2026-07-03 16:40:36,121 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662939.
+2026-07-03 16:40:36,122 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662944
+2026-07-03 16:40:36,122 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,312 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,322 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662944.
+2026-07-03 16:40:36,323 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662944.
+2026-07-03 16:40:36,323 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662947
+2026-07-03 16:40:36,324 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,517 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,530 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662947.
+2026-07-03 16:40:36,531 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662947.
+2026-07-03 16:40:36,532 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662948
+2026-07-03 16:40:36,533 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,733 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,742 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662948.
+2026-07-03 16:40:36,743 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662948.
+2026-07-03 16:40:36,743 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662949
+2026-07-03 16:40:36,744 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,931 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:36,940 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662949.
+2026-07-03 16:40:36,941 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662949.
+2026-07-03 16:40:36,942 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662950
+2026-07-03 16:40:36,942 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:37,182 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:37,192 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662950.
+2026-07-03 16:40:37,192 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662950.
+2026-07-03 16:40:37,194 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662951
+2026-07-03 16:40:37,196 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:37,387 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:37,399 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662951.
+2026-07-03 16:40:37,400 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662951.
+2026-07-03 16:40:37,401 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662952
+2026-07-03 16:40:37,402 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:37,593 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:37,602 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662952.
+2026-07-03 16:40:37,603 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662952.
+2026-07-03 16:40:37,604 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662964
+2026-07-03 16:40:37,605 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:37,792 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:37,801 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662964.
+2026-07-03 16:40:37,802 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662964.
+2026-07-03 16:40:37,803 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662976
+2026-07-03 16:40:37,803 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:37,994 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:38,005 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662976.
+2026-07-03 16:40:38,006 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662976.
+2026-07-03 16:40:38,009 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00662977
+2026-07-03 16:40:38,010 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:38,201 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:38,216 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00662977.
+2026-07-03 16:40:38,216 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00662977.
+2026-07-03 16:40:38,217 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663068
+2026-07-03 16:40:38,218 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:38,408 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:38,427 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663068.
+2026-07-03 16:40:38,428 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663068.
+2026-07-03 16:40:38,428 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663069
+2026-07-03 16:40:38,429 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:38,617 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:38,632 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663069.
+2026-07-03 16:40:38,633 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663069.
+2026-07-03 16:40:38,634 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663070
+2026-07-03 16:40:38,635 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:38,824 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:38,843 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663070.
+2026-07-03 16:40:38,845 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663070.
+2026-07-03 16:40:38,846 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663077
+2026-07-03 16:40:38,848 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,036 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,049 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663077.
+2026-07-03 16:40:39,052 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663077.
+2026-07-03 16:40:39,053 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663103
+2026-07-03 16:40:39,054 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,255 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,264 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663103.
+2026-07-03 16:40:39,265 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663103.
+2026-07-03 16:40:39,266 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663127
+2026-07-03 16:40:39,266 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,455 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,464 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663127.
+2026-07-03 16:40:39,465 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663127.
+2026-07-03 16:40:39,466 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663128
+2026-07-03 16:40:39,467 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,652 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,662 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663128.
+2026-07-03 16:40:39,662 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663128.
+2026-07-03 16:40:39,663 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663142
+2026-07-03 16:40:39,664 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,850 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:39,861 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663142.
+2026-07-03 16:40:39,861 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663142.
+2026-07-03 16:40:39,862 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663153
+2026-07-03 16:40:39,863 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,056 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,076 | INFO     | root                 | -> Estado actualizado para 2 líneas del pedido PED00663153.
+2026-07-03 16:40:40,077 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663153.
+2026-07-03 16:40:40,078 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663158
+2026-07-03 16:40:40,079 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,268 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,280 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663158.
+2026-07-03 16:40:40,281 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663158.
+2026-07-03 16:40:40,282 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663160
+2026-07-03 16:40:40,282 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,473 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,482 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663160.
+2026-07-03 16:40:40,483 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663160.
+2026-07-03 16:40:40,484 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663180
+2026-07-03 16:40:40,485 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,671 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,688 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663180.
+2026-07-03 16:40:40,689 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663180.
+2026-07-03 16:40:40,690 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663181
+2026-07-03 16:40:40,690 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,946 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:40,957 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663181.
+2026-07-03 16:40:40,958 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663181.
+2026-07-03 16:40:40,958 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663190
+2026-07-03 16:40:40,959 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,154 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,167 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663190.
+2026-07-03 16:40:41,168 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663190.
+2026-07-03 16:40:41,169 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663191
+2026-07-03 16:40:41,170 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,380 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,392 | INFO     | root                 | -> Estado actualizado para 3 líneas del pedido PED00663191.
+2026-07-03 16:40:41,393 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663191.
+2026-07-03 16:40:41,393 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663195
+2026-07-03 16:40:41,395 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,581 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,591 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663195.
+2026-07-03 16:40:41,592 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663195.
+2026-07-03 16:40:41,592 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663197
+2026-07-03 16:40:41,593 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,782 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,791 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663197.
+2026-07-03 16:40:41,792 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663197.
+2026-07-03 16:40:41,793 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663216
+2026-07-03 16:40:41,794 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,986 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:41,995 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663216.
+2026-07-03 16:40:41,996 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663216.
+2026-07-03 16:40:41,997 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663252
+2026-07-03 16:40:41,997 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:42,185 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:42,195 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663252.
+2026-07-03 16:40:42,196 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663252.
+2026-07-03 16:40:42,196 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663253
+2026-07-03 16:40:42,197 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:42,389 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:42,401 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663253.
+2026-07-03 16:40:42,402 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663253.
+2026-07-03 16:40:42,403 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663254
+2026-07-03 16:40:42,403 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:42,590 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:42,598 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663254.
+2026-07-03 16:40:42,599 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663254.
+2026-07-03 16:40:42,600 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663326
+2026-07-03 16:40:42,601 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:42,922 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:42,934 | INFO     | root                 | -> Estado actualizado para 16 líneas del pedido PED00663326.
+2026-07-03 16:40:42,935 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663326.
+2026-07-03 16:40:42,936 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663342
+2026-07-03 16:40:42,937 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,126 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,137 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663342.
+2026-07-03 16:40:43,138 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663342.
+2026-07-03 16:40:43,138 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663358
+2026-07-03 16:40:43,139 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,329 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,351 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663358.
+2026-07-03 16:40:43,352 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663358.
+2026-07-03 16:40:43,352 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663377
+2026-07-03 16:40:43,353 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,545 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,554 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663377.
+2026-07-03 16:40:43,555 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663377.
+2026-07-03 16:40:43,556 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663378
+2026-07-03 16:40:43,557 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,746 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,755 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663378.
+2026-07-03 16:40:43,756 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663378.
+2026-07-03 16:40:43,756 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663391
+2026-07-03 16:40:43,757 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,946 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:43,958 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663391.
+2026-07-03 16:40:43,958 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663391.
+2026-07-03 16:40:43,959 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663392
+2026-07-03 16:40:43,959 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,151 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,160 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663392.
+2026-07-03 16:40:44,160 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663392.
+2026-07-03 16:40:44,161 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663393
+2026-07-03 16:40:44,161 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,349 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,358 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663393.
+2026-07-03 16:40:44,359 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663393.
+2026-07-03 16:40:44,359 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663394
+2026-07-03 16:40:44,360 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,546 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,560 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663394.
+2026-07-03 16:40:44,561 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663394.
+2026-07-03 16:40:44,562 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663395
+2026-07-03 16:40:44,563 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,566 | INFO     | root                 | -> Pedido PED00663395 no tiene odoo_sale_order_id. No se publicará en Chatter.
+2026-07-03 16:40:44,750 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,757 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663395.
+2026-07-03 16:40:44,758 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663395.
+2026-07-03 16:40:44,758 | INFO     | script_02_actualizar_estados_bmg |   - Verificando estado para el pedido: PED00663397
+2026-07-03 16:40:44,759 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,761 | INFO     | root                 | -> Pedido PED00663397 no tiene odoo_sale_order_id. No se publicará en Chatter.
+2026-07-03 16:40:44,947 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,959 | INFO     | root                 | -> Estado actualizado para 1 líneas del pedido PED00663397.
+2026-07-03 16:40:44,960 | INFO     | root                 | -> ℹ️ No se detectaron cambios de estado para el pedido PED00663397.
+2026-07-03 16:40:44,961 | INFO     | root                 | --- Script 2 Finalizado ---
+2026-07-03 16:40:44,962 | INFO     | root                 | --- [Paso 4: Confirmar Ventas y Crear Pickings en Odoo] ---
+2026-07-03 16:40:44,963 | INFO     | root                 | --- Iniciando Script 4: Confirmar Ventas y Crear Pickings [2026-07-03 16:40:44] ---
+2026-07-03 16:40:44,964 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:44,980 | INFO     | root                 | No hay pedidos pendientes de confirmación y creación de pickings.
+2026-07-03 16:40:44,981 | INFO     | root                 | --- [Paso 5: Generar Archivos de Producción (TAPA)] ---
+2026-07-03 16:40:44,982 | INFO     | root                 | --- Script 7 (TAPA) ---
+2026-07-03 16:40:44,984 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:47,022 | INFO     | root                 | ✅ Conexión a Odoo establecida con éxito.
+2026-07-03 16:40:47,025 | INFO     | script_07_generar_tapa_produccion |       -> Buscando ruta para TitleID: '1120210' con Publisher IDs: ['104572', '108943', 'PodiPrint']
+2026-07-03 16:40:47,027 | INFO     | script_07_generar_tapa_produccion |       -> RUTA BASE A REVISAR: /originales
+2026-07-03 16:40:47,039 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/AR
+2026-07-03 16:40:47,062 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/BR
+2026-07-03 16:40:47,084 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/CL
+2026-07-03 16:40:47,102 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/CO
+2026-07-03 16:40:47,116 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/EC
+2026-07-03 16:40:47,127 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/ES
+2026-07-03 16:40:47,147 | INFO     | script_07_generar_tapa_produccion |       -> Match de Publisher encontrado. Revisando carpeta: /originales/ES/133/104572
+2026-07-03 16:40:47,169 | INFO     | script_07_generar_tapa_produccion |       -> Match de Publisher encontrado. Revisando carpeta: /originales/ES/143/108943
+2026-07-03 16:40:47,177 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/GT
+2026-07-03 16:40:47,189 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/IC
+2026-07-03 16:40:47,200 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/MX
+2026-07-03 16:40:47,218 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/PE
+2026-07-03 16:40:47,232 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/US
+2026-07-03 16:40:47,244 | INFO     | script_07_generar_tapa_produccion |       -> Revisando País: /originales/UY
+2026-07-03 16:40:47,258 | WARNING  | script_07_generar_tapa_produccion |       -> ⚠️ No se encontró la carpeta para TitleID: 1120210 con los publishers provistos.
+2026-07-03 16:40:50,297 | INFO     | root                 | --- [Paso 6: Generar Archivos de Producción (INTERIOR)] ---
+2026-07-03 16:40:50,298 | INFO     | root                 | --- Script 6 (INTERIOR) ---
+2026-07-03 16:40:50,299 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:50,315 | INFO     | root                 | --- [Paso 7: Crear Órdenes de Fabricación en Odoo] ---
+2026-07-03 16:40:50,316 | INFO     | script_05_crear_ordenes_fabricacion | --- Iniciando Script 5: Creación de Órdenes de Fabricación --- [2026-07-03 16:40:50] ---
+2026-07-03 16:40:50,318 | INFO     | root                 | DEBUG_DB_PATH: Connecting to database at -> /app/trabajos.db
+2026-07-03 16:40:50,334 | INFO     | script_05_crear_ordenes_fabricacion | No hay trabajos nuevos para crear Órdenes de Fabricación.
+2026-07-03 16:40:50,335 | INFO     | root                 | --- [Paso 8: Sincronizar Estados de Envío Mercado Libre] ---
+2026-07-03 16:40:50,337 | INFO     | root                 | --- [Sincronizando Estados de Envío desde Mercado Libre] ---
+2026-07-03 16:40:52,429 | INFO     | root                 | ✅ Conexión a Odoo establecida con éxito.
+2026-07-03 16:40:54,633 | INFO     | root                 | 🔍 Procesando 21 pickings pendientes...
+2026-07-03 16:40:56,885 | INFO     | root                 | -> WH/OUT/19875 | Estado ML: 'not_delivered' | Estado Odoo: 'enviado'
+2026-07-03 16:40:56,887 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:40:57,702 | INFO     | root                 | -> WH/OUT/20260 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:40:57,703 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:40:58,506 | INFO     | root                 | -> WH/OUT/20360 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:40:58,506 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:40:59,323 | INFO     | root                 | -> WH/OUT/20341 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:40:59,325 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:00,199 | INFO     | root                 | -> WH/OUT/20340 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:00,202 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:01,036 | INFO     | root                 | -> WH/OUT/20319 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:01,036 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:01,971 | INFO     | root                 | -> WH/OUT/20316 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:01,971 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:02,864 | INFO     | root                 | -> WH/OUT/20313 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:02,867 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:03,878 | INFO     | root                 | -> WH/OUT/20309 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:03,878 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:04,818 | INFO     | root                 | -> WH/OUT/20400 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:04,819 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:05,621 | INFO     | root                 | -> WH/OUT/20439 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:05,621 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:06,464 | INFO     | root                 | -> WH/OUT/20427 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:06,464 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:07,261 | INFO     | root                 | -> WH/OUT/20424 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:07,262 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:08,100 | INFO     | root                 | -> WH/OUT/20416 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:08,100 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:08,906 | INFO     | root                 | -> WH/OUT/20414 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:08,906 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:09,741 | INFO     | root                 | -> WH/OUT/20402 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:09,742 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:10,553 | INFO     | root                 | -> WH/OUT/20549 | Estado ML: 'shipped' | Estado Odoo: 'enviado'
+2026-07-03 16:41:10,554 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:11,420 | INFO     | root                 | -> WH/OUT/20588 | Estado ML: 'ready_to_ship' | Estado Odoo: 'assigned'
+2026-07-03 16:41:11,420 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:12,262 | INFO     | root                 | -> WH/OUT/20587 | Estado ML: 'ready_to_ship' | Estado Odoo: 'assigned'
+2026-07-03 16:41:12,266 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:13,069 | INFO     | root                 | -> WH/OUT/20586 | Estado ML: 'ready_to_ship' | Estado Odoo: 'assigned'
+2026-07-03 16:41:13,070 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:13,861 | INFO     | root                 | -> WH/OUT/20597 | Estado ML: 'ready_to_ship' | Estado Odoo: 'assigned'
+2026-07-03 16:41:13,862 | INFO     | root                 | -> ⚪ Sin cambios
+2026-07-03 16:41:13,864 | INFO     | root                 | --- Sincronización de estados finalizada ---
+2026-07-03 16:41:13,865 | INFO     | root                 | --- ✅ FLUJO DE TRABAJO COMPLETO FINALIZADO [2026-07-03 16:41:13] ---
+--- Ciclo finalizado. Esperando 10 minutos... ---
