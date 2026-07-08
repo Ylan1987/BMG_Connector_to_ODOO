@@ -135,13 +135,29 @@ def procesar_tapa(trabajo_actual):
         
         # --- NUEVO: Agrandar el lienzo (MediaBox) si no hay espacio arriba ---
         media = doc[0].mediabox
+        cropbox_actual = doc[0].cropbox
         espacio_arriba = trim.y0 - media.y0
         espacio_necesario = 100  # Queremos al menos 100 puntos de margen superior para acomodar el barcode grande
         if espacio_arriba < espacio_necesario:
             falta = espacio_necesario - espacio_arriba
-            nuevo_media = fitz.Rect(media.x0, media.y0 - falta, media.x1, media.y1)
-            doc[0].set_mediabox(nuevo_media)
-            doc[0].set_cropbox(nuevo_media)
+            nuevo_top = media.y0 - falta
+            # IMPORTANTE: no asumimos que el CropBox original coincide con el
+            # MediaBox original. Si el PDF trae un CropBox propio (distinto),
+            # asignar directamente 'nuevo_media' como CropBox puede fallar con
+            # 'CropBox not in MediaBox' si ese CropBox original queda afuera.
+            # Tomamos la UNION de: MediaBox actual, CropBox actual, y el nuevo
+            # alto necesario. Al asignar esa misma union a ambos (Media y Crop),
+            # el CropBox por construccion siempre queda contenido.
+            union = fitz.Rect(
+                min(media.x0, cropbox_actual.x0),
+                min(nuevo_top, media.y0, cropbox_actual.y0),
+                max(media.x1, cropbox_actual.x1),
+                max(media.y1, cropbox_actual.y1),
+            )
+            _logger.info(f"      [DEBUG] TitleID {trabajo_actual.get('title_id')}: "
+                         f"media_orig={media!r} cropbox_orig={cropbox_actual!r} -> union={union!r}")
+            doc[0].set_mediabox(union)
+            doc[0].set_cropbox(union)
             # Como expandimos el lienzo hacia arriba, y_base ya no tiene riesgo de ser negativo
         # ---------------------------------------------------------------------
             
