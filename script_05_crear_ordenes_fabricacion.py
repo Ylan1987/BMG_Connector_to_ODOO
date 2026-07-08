@@ -198,17 +198,27 @@ def crear_ldm(odoo, product_id, components, operations, trabajo):
         
         # --- OPERACIONES: actualizar IN-PLACE para NO romper workorders existentes ---
         # Las operaciones (mrp.routing.workcenter) son referenciadas por workorders
-        # a través de operation_id. Si las borramos con (5,0,0), los workorders
+        # a traves de operation_id. Si las borramos con (5,0,0), los workorders
         # pierden x_bmg_estado_wip_id y x_bmg_estado_done_id.
         MrpRoutingWC = odoo.env['mrp.routing.workcenter']
-        bom_record = MrpBom.browse(bom_id)
-        existing_op_ids = bom_record.operation_ids
-        
+
+        # IMPORTANTE: usamos search_read en vez de .browse() + iterar
+        # bom_record.operation_ids. Ese one2many devuelve objetos ya
+        # "browseados" (no IDs), y volver a pasarlos a .browse() (o guardarlos
+        # tal cual en un comando de escritura) rompe con
+        # 'Object of type mrp_routing_workcenter is not JSON serializable'.
+        bom_data = MrpBom.search_read([('id', '=', bom_id)], ['id', 'operation_ids'])
+        existing_op_ids = bom_data[0].get('operation_ids') or [] if bom_data else []
+
         # Crear un mapa de operaciones existentes por nombre
         existing_ops_by_name = {}
-        for op_id in existing_op_ids:
-            op_rec = MrpRoutingWC.browse(op_id)
-            existing_ops_by_name[op_rec.name] = op_id
+        if existing_op_ids:
+            op_rows = MrpRoutingWC.search_read(
+                [('id', 'in', existing_op_ids)],
+                ['id', 'name']
+            )
+            for op_row in op_rows:
+                existing_ops_by_name[op_row['name']] = op_row['id']
         
         # Determinar qué operaciones necesitan update, crear o eliminar
         new_op_names = set()
