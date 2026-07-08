@@ -16,15 +16,13 @@ import sqlite3
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import mapeos
 
-# Pedidos/lineas que fallaron con el mismo error CropBox/MediaBox
-# (ver log 2026-07-08 20:17 y reprocesos posteriores)
+# Pedidos/lineas que siguieron fallando con CropBox/MediaBox incluso con el
+# fix de set_cropbox(doc[0].rect) (ver log 2026-07-08 20:52) - necesitan el
+# fix definitivo del margen epsilon para reprocesarse bien.
 ORDER_LINES_BUSCAR = [
-    ("664256", 1),
-    ("664266", 1),
     ("664266", 2),
-    ("664518", 1),
-    ("664480", 1),
     ("664356", 1),
+    ("664480", 1),
 ]
 
 db_path = os.path.abspath(mapeos.DB_FILE)
