@@ -209,6 +209,9 @@ def crear_ldm(odoo, product_id, components, operations, trabajo):
         # 'Object of type mrp_routing_workcenter is not JSON serializable'.
         bom_data = MrpBom.search_read([('id', '=', bom_id)], ['id', 'operation_ids'])
         existing_op_ids = bom_data[0].get('operation_ids') or [] if bom_data else []
+        _logger.info(f"      [DEBUG] bom_data={bom_data!r}")
+        _logger.info(f"      [DEBUG] existing_op_ids={existing_op_ids!r} tipo={type(existing_op_ids)} "
+                     f"tipos_elementos={[type(x) for x in existing_op_ids]}")
 
         # Crear un mapa de operaciones existentes por nombre
         existing_ops_by_name = {}
@@ -217,8 +220,11 @@ def crear_ldm(odoo, product_id, components, operations, trabajo):
                 [('id', 'in', existing_op_ids)],
                 ['id', 'name']
             )
+            _logger.info(f"      [DEBUG] op_rows={op_rows!r}")
             for op_row in op_rows:
                 existing_ops_by_name[op_row['name']] = op_row['id']
+            _logger.info(f"      [DEBUG] existing_ops_by_name={existing_ops_by_name!r} "
+                         f"tipos_valores={[type(v) for v in existing_ops_by_name.values()]}")
         
         # Determinar qué operaciones necesitan update, crear o eliminar
         new_op_names = set()
@@ -243,7 +249,14 @@ def crear_ldm(odoo, product_id, components, operations, trabajo):
                 _logger.info(f"      -> Eliminando operación obsoleta '{old_name}' (ID: {old_id})")
         
         if ops_cmds:
-            MrpBom.write([bom_id], {'operation_ids': ops_cmds})
+            _logger.info(f"      [DEBUG] ops_cmds antes de escribir (tipos): "
+                         f"{[(c[0], type(c[1]).__name__, c[1]) for c in ops_cmds]}")
+            try:
+                MrpBom.write([bom_id], {'operation_ids': ops_cmds})
+            except Exception as e_write:
+                _logger.error(f"      [DEBUG] FALLO el write de operation_ids. "
+                              f"ops_cmds completo: {ops_cmds!r}")
+                raise
         
         _logger.info(f"    -> ✅ LdM ID {bom_id} actualizada (componentes recreados, operaciones actualizadas in-place).")
         return
