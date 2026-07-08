@@ -188,16 +188,54 @@ def crear_ldm(odoo, product_id, components, operations, trabajo):
         bom_id = existing_boms[0]
         _logger.info(f"    -> LdM para el producto variante ID {product_id} ya existe (ID: {bom_id}). Actualizando...")
         
-        # Para actualizar, primero borramos las líneas existentes y luego añadimos las nuevas.
+        # --- COMPONENTES: se pueden borrar y recrear sin problema ---
         MrpBom.write([bom_id], {
             'bom_line_ids': [(5, 0, 0)],
-            'operation_ids': [(5, 0, 0)]
         })
         MrpBom.write([bom_id], {
             'bom_line_ids': bom_line_vals,
-            'operation_ids': operation_vals
         })
-        _logger.info(f"    -> ✅ LdM ID {bom_id} actualizada con nuevos componentes y operaciones.")
+        
+        # --- OPERACIONES: actualizar IN-PLACE para NO romper workorders existentes ---
+        # Las operaciones (mrp.routing.workcenter) son referenciadas por workorders
+        # a través de operation_id. Si las borramos con (5,0,0), los workorders
+        # pierden x_bmg_estado_wip_id y x_bmg_estado_done_id.
+        MrpRoutingWC = odoo.env['mrp.routing.workcenter']
+        bom_record = MrpBom.browse(bom_id)
+        existing_op_ids = bom_record.operation_ids
+        
+        # Crear un mapa de operaciones existentes por nombre
+        existing_ops_by_name = {}
+        for op_id in existing_op_ids:
+            op_rec = MrpRoutingWC.browse(op_id)
+            existing_ops_by_name[op_rec.name] = op_id
+        
+        # Determinar qué operaciones necesitan update, crear o eliminar
+        new_op_names = set()
+        ops_cmds = []
+        for _, _, op_data in operation_vals:
+            op_name = op_data['name']
+            new_op_names.add(op_name)
+            
+            if op_name in existing_ops_by_name:
+                # Actualizar la operación existente in-place (preserva el ID)
+                ops_cmds.append((1, existing_ops_by_name[op_name], op_data))
+                _logger.info(f"      -> Actualizando operación existente '{op_name}' (ID: {existing_ops_by_name[op_name]})")
+            else:
+                # Crear nueva operación
+                ops_cmds.append((0, 0, op_data))
+                _logger.info(f"      -> Creando nueva operación '{op_name}'")
+        
+        # Eliminar operaciones que ya no son necesarias (solo si no están en la nueva lista)
+        for old_name, old_id in existing_ops_by_name.items():
+            if old_name not in new_op_names:
+                ops_cmds.append((2, old_id, 0))
+                _logger.info(f"      -> Eliminando operación obsoleta '{old_name}' (ID: {old_id})")
+        
+        if ops_cmds:
+            MrpBom.write([bom_id], {'operation_ids': ops_cmds})
+        
+        _logger.info(f"    -> ✅ LdM ID {bom_id} actualizada (componentes recreados, operaciones actualizadas in-place).")
         return
 
     # Si no existe, la creamos
