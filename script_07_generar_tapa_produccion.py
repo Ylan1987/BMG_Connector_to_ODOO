@@ -162,7 +162,15 @@ def procesar_tapa(trabajo_actual):
             # "crudo" (con el mismo origen que le pasamos a set_mediabox). Pasarle
             # 'union' directamente revienta con 'CropBox not in MediaBox' aunque
             # sea el mismo rectangulo, porque los sistemas de coordenadas difieren.
-            doc[0].set_cropbox(doc[0].rect)
+            # ADEMAS: incluso usando doc[0].rect tal cual, en ciertas dimensiones
+            # (decimales largos) el redondeo interno de MuPDF al escribir el
+            # MediaBox hace que el propio rect quede unas milesimas de punto
+            # afuera de si mismo -> sigue explotando "CropBox not in MediaBox".
+            # Achicamos el CropBox con un margen minimo (epsilon) para blindarlo
+            # de ese drift de punto flotante; 0.5pt (~0.18mm) es imperceptible.
+            EPS = 0.5
+            r = doc[0].rect
+            doc[0].set_cropbox(fitz.Rect(r.x0 + EPS, r.y0 + EPS, r.x1 - EPS, r.y1 - EPS))
             # Como expandimos el lienzo hacia arriba, y_base ya no tiene riesgo de ser negativo
         # ---------------------------------------------------------------------
             
