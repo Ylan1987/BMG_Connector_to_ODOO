@@ -133,14 +133,23 @@ def procesar_tapa(trabajo_actual):
             return None
         trim = cajas['trim']
         
-        # --- NUEVO: Agrandar el lienzo (MediaBox) si no hay espacio arriba ---
+        # --- NUEVO: Agrandar el lienzo (MediaBox) de forma centrada si no hay espacio ---
         media = doc[0].mediabox
         cropbox_actual = doc[0].cropbox
-        espacio_arriba = trim.y0 - media.y0
-        espacio_necesario = 100  # Queremos al menos 100 puntos de margen superior para acomodar el barcode grande
-        if espacio_arriba < espacio_necesario:
-            falta = espacio_necesario - espacio_arriba
-            nuevo_top = media.y0 - falta
+        # OJO: en coordenadas PDF (origen abajo-izquierda), y0 es el borde INFERIOR
+        # y y1 el borde SUPERIOR. 'trim.y0 - media.y0' mide el margen de ABAJO, no
+        # el de arriba (bug anterior: crecia hacia abajo creyendo que crecia hacia
+        # arriba). Ahora medimos ambos lados por separado.
+        espacio_abajo = trim.y0 - media.y0
+        espacio_arriba = media.y1 - trim.y1
+        espacio_necesario = 100  # margen minimo que necesitamos a CADA lado para el barcode
+        espacio_disponible = min(espacio_abajo, espacio_arriba)
+        if espacio_disponible < espacio_necesario:
+            # Centrado: agrandamos lo mismo arriba que abajo (el doble de alto total
+            # que si solo creciera de un lado), en vez de crecer de un solo lado.
+            falta = espacio_necesario - espacio_disponible
+            nuevo_bottom = media.y0 - falta
+            nuevo_top = media.y1 + falta
             # IMPORTANTE: no asumimos que el CropBox original coincide con el
             # MediaBox original. Si el PDF trae un CropBox propio (distinto),
             # asignar directamente 'nuevo_media' como CropBox puede fallar con
@@ -150,9 +159,9 @@ def procesar_tapa(trabajo_actual):
             # el CropBox por construccion siempre queda contenido.
             union = fitz.Rect(
                 min(media.x0, cropbox_actual.x0),
-                min(nuevo_top, media.y0, cropbox_actual.y0),
+                min(nuevo_bottom, media.y0, cropbox_actual.y0),
                 max(media.x1, cropbox_actual.x1),
-                max(media.y1, cropbox_actual.y1),
+                max(nuevo_top, media.y1, cropbox_actual.y1),
             )
             _logger.info(f"      [DEBUG] TitleID {trabajo_actual.get('title_id')}: "
                          f"media_orig={media!r} cropbox_orig={cropbox_actual!r} -> union={union!r}")
@@ -171,7 +180,6 @@ def procesar_tapa(trabajo_actual):
             EPS = 0.5
             r = doc[0].rect
             doc[0].set_cropbox(fitz.Rect(r.x0 + EPS, r.y0 + EPS, r.x1 - EPS, r.y1 - EPS))
-            # Como expandimos el lienzo hacia arriba, y_base ya no tiene riesgo de ser negativo
         # ---------------------------------------------------------------------
             
         laminado = trabajo_actual.get('laminate')
