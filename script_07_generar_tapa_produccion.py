@@ -157,7 +157,12 @@ def procesar_tapa(trabajo_actual):
             _logger.info(f"      [DEBUG] TitleID {trabajo_actual.get('title_id')}: "
                          f"media_orig={media!r} cropbox_orig={cropbox_actual!r} -> union={union!r}")
             doc[0].set_mediabox(union)
-            doc[0].set_cropbox(union)
+            # IMPORTANTE: set_cropbox() valida contra el rect YA renormalizado a
+            # origen (0,0) que expone PyMuPDF vía doc[0].rect, NO contra el rect
+            # "crudo" (con el mismo origen que le pasamos a set_mediabox). Pasarle
+            # 'union' directamente revienta con 'CropBox not in MediaBox' aunque
+            # sea el mismo rectangulo, porque los sistemas de coordenadas difieren.
+            doc[0].set_cropbox(doc[0].rect)
             # Como expandimos el lienzo hacia arriba, y_base ya no tiene riesgo de ser negativo
         # ---------------------------------------------------------------------
             
