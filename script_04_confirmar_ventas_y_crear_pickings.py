@@ -206,7 +206,15 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
             except ValueError: pass
 
         fecha_con_hora = f"{fecha_programada} {mapeos.ODOO_SCHEDULED_TIME}" if fecha_programada else False
-        
+
+        # También la guardamos en el Pedido de Venta (commitment_date es el
+        # campo nativo de Odoo para "fecha de entrega prometida"), asi
+        # mrp.production puede llegar a ella via sale_id sin tener que ir a
+        # buscar el/los stock.picking del pedido.
+        if fecha_con_hora:
+            try: sale_order.write({'commitment_date': fecha_con_hora})
+            except Exception as e: print(f"  ⚠️ No se pudo guardar commitment_date en el pedido {so_name}: {e}")
+
         # Convertir a Kg para Odoo
         peso_total_kg = peso_total_envio_gramos / 1000.0
         observaciones_bmg = envio.get('DestinationObservations', mapeos.ODOO_SHIPPING_NOTE_DEFAULT)
