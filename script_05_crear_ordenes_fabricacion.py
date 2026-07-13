@@ -736,7 +736,9 @@ def run():
                                 nuevo_nombre = f"{trabajo.get('order_code')}-{trabajo.get('line_number')} tapa de {book_title} (SO: {sale_order.name})"
                             elif product_name.startswith('[INTERIOR]'):
                                 nuevo_nombre = f"{trabajo.get('order_code')}-{trabajo.get('line_number')} interior de {book_title} (SO: {sale_order.name})"
-                            
+                            elif product_name.startswith('[COMP-INT-COLOR]'):
+                                nuevo_nombre = f"{trabajo.get('order_code')}-{trabajo.get('line_number')} interior color de {book_title} (SO: {sale_order.name})"
+
                             if nuevo_nombre and of_hija_record.name:
                                 write_vals['name'] = f"{of_hija_record.name} - {nuevo_nombre}"[:255]
 
@@ -758,6 +760,23 @@ def run():
                             ofs_procesadas.add(of_id)
             
             _logger.info(f"    ✅ ¡Proceso de fabricación para OF {new_of_id} y su descendencia iniciado!")
+
+            # --- Enlazar imagen de tapa (si existe) a todas las OF de este trabajo ---
+            # Corre server-side (el binario no viaje por RPC): busca todas las OF
+            # de este trabajo (principal + hijas, comparten el mismo origin) y les
+            # copia la miniatura ya subida por script_06 a sale.order.line.
+            try:
+                sale_order_line_id = trabajo.get('odoo_sale_order_line_id')
+                if sale_order_line_id:
+                    ofs_del_trabajo_ids = mrp_production_model.search([
+                        ('origin', '=', sale_order.name),
+                        (mapeos.ODOO_MRP_PRODUCTION_BMG_ORDER_LINE_FIELD, '=', line_number),
+                    ])
+                    if ofs_del_trabajo_ids:
+                        mrp_production_model.browse(ofs_del_trabajo_ids).action_set_cover_image_from_sale_line(sale_order_line_id)
+                        _logger.info(f"    -> Imagen de tapa enlazada a {len(ofs_del_trabajo_ids)} OF(s) del trabajo.")
+            except Exception as e_img:
+                _logger.warning(f"    ⚠️ No se pudo enlazar la imagen de tapa a las OF: {e_img}")
 
             conn_update = db_conn.conectar_db()
             cursor_update = conn_update.cursor()
