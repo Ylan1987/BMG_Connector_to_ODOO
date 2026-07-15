@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from common import mapeos, db_conn, odoo_conn, meli_api
 from common.notificador import enviar_email # Importar el notificador
 import common.bmg_estados_mapeo as bmg_estados_mapeo
+from common.bmg_task_sync import aplicar_accion_por_estado_bmg
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -485,6 +486,25 @@ def run():
                             except Exception as db_err:
                                 _logger.error(f"  -> ❌ Error al guardar el ID de la tarea {task_id} en la DB local: {db_err}")
 
+                            # --- Sincronizar la tarea recién creada con el estado BMG ACTUAL del pedido ---
+                            # Cubre el caso de pedidos que ya llegan con archivos recibidos (o más adelantados)
+                            # desde el primer sync: script_02 solo reacciona a CAMBIOS de estado, así que si el
+                            # estado ya estaba en ese punto desde el vamos, nunca dispararía el movimiento.
+                            try:
+                                current_status_id_raw = trabajo_de_referencia.get('line_status_id')
+                                if current_status_id_raw is not None:
+                                    current_status_id = int(current_status_id_raw)
+                                    _logger.info(f"  -> 🔄 Sincronizando tarea {task_id} con estado BMG actual: "
+                                                 f"{bmg_estados_mapeo.get_bmg_status_name(current_status_id)} ({current_status_id}).")
+                                    aplicar_accion_por_estado_bmg(
+                                        odoo_api, current_status_id,
+                                        trabajo_de_referencia['order_code'], trabajo_de_referencia['line_number'],
+                                        odoo_opportunity_id=pedido_cabecera.get('odoo_opportunity_id_agg'),
+                                        odoo_project_task_id=task_id,
+                                        odoo_sale_order_id=so_id
+                                    )
+                            except Exception as sync_err:
+                                _logger.error(f"  -> ❌ Error al sincronizar la tarea {task_id} con el estado BMG actual: {sync_err}")
 
                         else:
                             _logger.warning(f"  -> ⚠️ No se encontró la descripción del libro en la DB local para actualizar la tarea {task_id}.")
