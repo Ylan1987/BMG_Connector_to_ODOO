@@ -143,10 +143,10 @@ def _get_or_create_attribute_value(odoo_api, template_id, attribute_name, value_
     return final_ptav_id
 
 def _determinar_tamano_produccion(width, height):
-    sizes = {mapeos.ODOO_PRODUCT_SIZE_10_5X17: (105, 170), mapeos.ODOO_PRODUCT_SIZE_15_5X22_5: (155, 225), mapeos.ODOO_PRODUCT_SIZE_17X24: (170, 240), mapeos.ODOO_PRODUCT_SIZE_22X30: (220, 300)}
+    sizes = {mapeos.ODOO_PRODUCT_SIZE_10_5X17: (100, 165), mapeos.ODOO_PRODUCT_SIZE_15_5X22_5: (156, 221), mapeos.ODOO_PRODUCT_SIZE_17X24: (171, 241)}
     for name, (prod_w, prod_h) in sizes.items():
         if (width <= prod_w and height <= prod_h) or (width <= prod_h and height <= prod_w): return name
-    return mapeos.ODOO_PRODUCT_SIZE_NO_CORRESPONDE
+    return mapeos.ODOO_PRODUCT_SIZE_22X30
 
 def _crear_lineas_envio(odoo_api, trabajo_cabecera, shipping_product_id, moneda_code_pedido, cliente_id, shipping_product_name, meli_data=None, analytic_accounts=None):
     lineas_envio = []
