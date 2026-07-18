@@ -112,6 +112,32 @@ def obtener_access_token(forzar_sync_odoo=False):
     # Fallback: Si no hay archivo, pero hay un token en mapeos (primer uso)
     return getattr(mapeos, 'MELI_ACCESS_TOKEN', None)
 
+def _obtener_orden_cruda(meli_order_id, headers):
+    """Trae el JSON crudo de una orden de ML, sin cálculos adicionales."""
+    url = f"https://api.mercadolibre.com/orders/{meli_order_id}"
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        _logger.error(f"    -> [MELI] Error al consultar orden hermana {meli_order_id}: {e}")
+    return None
+
+def _obtener_ids_hermanas_pack(pack_id, headers, meli_order_id_actual):
+    """
+    Devuelve los ids de las demás órdenes que comparten pack_id (mismo envío) con
+    meli_order_id_actual, excluyéndola a ella misma.
+    """
+    url = f"https://api.mercadolibre.com/packs/{pack_id}"
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            ids = [str(o.get('id')) for o in response.json().get('orders', [])]
+            return [oid for oid in ids if oid != str(meli_order_id_actual)]
+    except Exception as e:
+        _logger.error(f"    -> [MELI] Error al consultar pack {pack_id}: {e}")
+    return []
+
 def obtener_detalle_orden_ml(meli_order_id):
     """
     Consulta a la API de ML por el detalle completo de una orden.
@@ -171,10 +197,33 @@ def obtener_detalle_orden_ml(meli_order_id):
                 suma_items += (unit_price * qty)
                 if sku:
                     items_precios[sku] = unit_price
-            
+
+            total_pagado = float(data.get('paid_amount', 0.0))
+
+            # 2.b Si la orden viene en un "pack" (ML agrupa varios pedidos en un mismo envío
+            # cuando el comprador lleva varios libros), las órdenes hermanas tienen sus propios
+            # order_items que NO aparecen acá. Los traemos y los sumamos para que el matching
+            # por SKU en script_03 encuentre también esas líneas.
+            pack_id = data.get('pack_id')
+            if pack_id:
+                for sibling_id in _obtener_ids_hermanas_pack(pack_id, headers, meli_order_id):
+                    sibling_data = _obtener_orden_cruda(sibling_id, headers)
+                    if not sibling_data:
+                        continue
+                    for item_line in sibling_data.get('order_items', []):
+                        item_info = item_line.get('item', {})
+                        sku = item_info.get('seller_custom_field') or item_info.get('id')
+                        unit_price = float(item_line.get('unit_price', 0.0))
+                        qty = int(item_line.get('quantity', 1))
+                        suma_items += (unit_price * qty)
+                        if sku:
+                            items_precios[sku] = unit_price
+                    data['order_items'].extend(sibling_data.get('order_items', []))
+                    total_pagado += float(sibling_data.get('paid_amount', 0.0))
+                    print(f"    -> [MELI] 📦 Orden {meli_order_id} pertenece al pack {pack_id}. Se sumaron {len(sibling_data.get('order_items', []))} ítem(s) de la orden hermana {sibling_id}.")
+
             # 3. VALIDACIÓN CONTABLE
             # Nota: En Mercado Envíos 2, el paid_amount de la orden a veces NO incluye el envío si ML lo cobra aparte.
-            total_pagado = float(data.get('paid_amount', 0.0))
             esperado = suma_items + costo_envio
             diff = abs(esperado - total_pagado)
             
