@@ -125,29 +125,39 @@ def procesar_tapa(trabajo_actual):
     print(f"    Procesando TAPA -> Pedido: {oc} | Línea: {ln} | TitleID: {tid}")
     ruta_orig = trabajo_actual['ruta_archivo_tapa_original']
     doc = None
+    ruta_tmp_agrandado = None
     try:
-        doc = fitz.open(ruta_orig)
         cajas = obtener_cajas_normalizadas_pypdf(ruta_orig)
-        if not cajas: 
-            doc.close()
+        if not cajas:
             return None
         trim = cajas['trim']
-        
-        # --- NUEVO: Agrandar el lienzo (MediaBox) de forma centrada si no hay espacio ---
-        media = doc[0].mediabox
-        cropbox_actual = doc[0].cropbox
-        # OJO: en coordenadas PDF (origen abajo-izquierda), y0 es el borde INFERIOR
-        # y y1 el borde SUPERIOR. 'trim.y0 - media.y0' mide el margen de ABAJO, no
-        # el de arriba (bug anterior: crecia hacia abajo creyendo que crecia hacia
-        # arriba). Ahora medimos ambos lados por separado.
-        espacio_abajo = trim.y0 - media.y0
+
+        # Cuanto espacio necesita REALMENTE el codigo de barras (mas su margen)
+        # arriba del trim. Un solo lugar para estos numeros: se usan tanto para
+        # decidir si hace falta agrandar el lienzo como, mas abajo, para ubicar
+        # el codigo de barras y el texto de laminado.
+        MARGEN_SOBRE_TRIM_PT = 3 / MM_PER_POINT  # 3mm de separacion sobre el trim
+        ALTO_BARCODE_PT = 60
+        espacio_necesario = MARGEN_SOBRE_TRIM_PT + ALTO_BARCODE_PT
+
+        # Lectura liviana de los boxes originales (solo para decidir si hace falta
+        # agrandar el lienzo; no se escribe nada todavia).
+        doc_lectura = fitz.open(ruta_orig)
+        media = doc_lectura[0].mediabox
+        cropbox_actual = doc_lectura[0].cropbox
+        doc_lectura.close()
+
+        # --- Agrandar el lienzo (MediaBox) de forma centrada si no hay espacio arriba del trim ---
+        # Todo lo que insertamos (codigo de barras + leyenda de laminado) va
+        # SIEMPRE arriba del trim, nunca abajo - asi que solo el margen de
+        # ARRIBA decide si hace falta agrandar. Si ya alcanza, no se toca nada.
         espacio_arriba = media.y1 - trim.y1
-        espacio_necesario = 100  # margen minimo que necesitamos a CADA lado para el barcode
-        espacio_disponible = min(espacio_abajo, espacio_arriba)
-        if espacio_disponible < espacio_necesario:
+
+        ruta_para_fitz = ruta_orig
+        if espacio_arriba < espacio_necesario:
             # Centrado: agrandamos lo mismo arriba que abajo (el doble de alto total
             # que si solo creciera de un lado), en vez de crecer de un solo lado.
-            falta = espacio_necesario - espacio_disponible
+            falta = espacio_necesario - espacio_arriba
             nuevo_bottom = media.y0 - falta
             nuevo_top = media.y1 + falta
             # IMPORTANTE: no asumimos que el CropBox original coincide con el
@@ -165,28 +175,57 @@ def procesar_tapa(trabajo_actual):
             )
             _logger.info(f"      [DEBUG] TitleID {trabajo_actual.get('title_id')}: "
                          f"media_orig={media!r} cropbox_orig={cropbox_actual!r} -> union={union!r}")
-            doc[0].set_mediabox(union)
-            # IMPORTANTE: set_cropbox() valida contra el rect YA renormalizado a
-            # origen (0,0) que expone PyMuPDF vía doc[0].rect, NO contra el rect
-            # "crudo" (con el mismo origen que le pasamos a set_mediabox). Pasarle
-            # 'union' directamente revienta con 'CropBox not in MediaBox' aunque
-            # sea el mismo rectangulo, porque los sistemas de coordenadas difieren.
-            # ADEMAS: incluso usando doc[0].rect tal cual, en ciertas dimensiones
-            # (decimales largos) el redondeo interno de MuPDF al escribir el
-            # MediaBox hace que el propio rect quede unas milesimas de punto
-            # afuera de si mismo -> sigue explotando "CropBox not in MediaBox".
-            # Achicamos el CropBox con un margen minimo (epsilon) para blindarlo
-            # de ese drift de punto flotante; 0.5pt (~0.18mm) es imperceptible.
+            # IMPORTANTE: agrandamos los boxes con pypdf, NO con set_mediabox()+
+            # set_cropbox() de PyMuPDF. Para paginas cuyo MediaBox original tiene
+            # origen no-cero (comun en estos archivos: x0/y0 negativos),
+            # set_cropbox() de fitz revienta con "CropBox not in MediaBox" pase lo
+            # que pase - confirmado a mano: falla con margenes de 0.5pt Y de 22pt,
+            # y hasta pasandole el MISMO rect que el MediaBox recien seteado. No es
+            # un tema de redondeo de punto flotante (la vieja hipotesis): page.cropbox
+            # de PyMuPDF en esta version reporta las coordenadas en el frame
+            # "display" (0,0), mientras que set_cropbox() valida contra el frame
+            # crudo del MediaBox - dos sistemas de coordenadas que no coinciden
+            # cuando el MediaBox no arranca en (0,0).
+            # pypdf (la misma libreria que ya usamos arriba para leer los boxes con
+            # confianza) no tiene ese problema: sus setters .mediabox/.cropbox
+            # escriben directo el valor pedido. Dejamos que pypdf arme un archivo
+            # intermedio ya con el lienzo correcto, y fitz recien entra despues,
+            # solo para insertar texto y codigo de barras - nunca toca boxes.
+            import pypdf
+            from pypdf.generic import RectangleObject
             EPS = 0.5
-            r = doc[0].rect
-            doc[0].set_cropbox(fitz.Rect(r.x0 + EPS, r.y0 + EPS, r.x1 - EPS, r.y1 - EPS))
+            crop = fitz.Rect(union.x0 + EPS, union.y0 + EPS, union.x1 - EPS, union.y1 - EPS)
+            reader = pypdf.PdfReader(ruta_orig)
+            writer = pypdf.PdfWriter()
+            writer.append(reader)
+            page_pypdf = writer.pages[0]
+            page_pypdf.mediabox = RectangleObject((union.x0, union.y0, union.x1, union.y1))
+            page_pypdf.cropbox = RectangleObject((crop.x0, crop.y0, crop.x1, crop.y1))
+            ruta_tmp_agrandado = ruta_orig + f".agrandado_{oc}_{ln}.tmp.pdf"
+            with open(ruta_tmp_agrandado, 'wb') as f:
+                writer.write(f)
+            ruta_para_fitz = ruta_tmp_agrandado
         # ---------------------------------------------------------------------
-            
+
+        doc = fitz.open(ruta_para_fitz)
+
         laminado = trabajo_actual.get('laminate')
-        y_base = max(20, trim.y0-28)
+
+        # IMPORTANTE: 'trim' viene de pypdf en el frame CRUDO del PDF (origen abajo-
+        # izquierda, Y crece hacia ARRIBA), normalizado solo restando el origen del
+        # MediaBox ORIGINAL (media.x0/media.y0). insert_text()/insert_image() de
+        # fitz, en cambio, ubican en el frame de PAGINA (origen arriba-izquierda,
+        # Y crece hacia ABAJO) - el mismo que reporta page.rect. Usar 'trim.y1'
+        # directo como Y de fitz (como se hacia antes) pega el texto/codigo de
+        # barras contra el borde SUPERIOR de la hoja, en vez de justo arriba del
+        # trim. Conversion: fitz_y = borde_superior_pagina_actual - y_crudo.
+        media_final_y1 = union.y1 if ruta_tmp_agrandado else media.y1
+        trim_y1_crudo = trim.y1 + media.y0  # revertir la normalizacion de pypdf
+        y_base = media_final_y1 - trim_y1_crudo - MARGEN_SOBRE_TRIM_PT
+
         if laminado:
             doc[0].insert_text(fitz.Point(trim.x0, y_base), f"Laminado: {laminado}", fontsize=10)
-        
+
         base_barcode = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
         barcode_text = f"{base_barcode}-{trabajo_actual.get('line_number')}" if base_barcode else None
         if barcode_text:
@@ -196,10 +235,12 @@ def procesar_tapa(trabajo_actual):
                 from barcode.writer import ImageWriter
                 buffer = io.BytesIO()
                 Code128(barcode_text, writer=ImageWriter()).write(buffer, options={'write_text': False})
-                
-                # Lo alineamos por debajo con la leyenda de laminado (y_base)
+
+                # Apilado hacia arriba desde la misma linea base que el texto de
+                # laminado (y_base): en el frame de fitz "hacia arriba" es Y mas
+                # chico, por eso y_top = y_bottom - 60.
                 y_bottom = y_base
-                y_top = y_bottom - 60
+                y_top = y_bottom - ALTO_BARCODE_PT
                 barcode_rect = fitz.Rect(trim.x0 + 150, y_top, trim.x0 + 150 + 500, y_bottom)
                 doc[0].insert_image(barcode_rect, stream=buffer.getvalue(), keep_proportion=True)
             except Exception as e:
@@ -225,6 +266,10 @@ def procesar_tapa(trabajo_actual):
         print(f"      ERROR procesando tapa: {e}")
         if doc: doc.close()
         return None
+    finally:
+        if ruta_tmp_agrandado and os.path.exists(ruta_tmp_agrandado):
+            try: os.remove(ruta_tmp_agrandado)
+            except Exception: pass
 
 def run():
     if not mapeos.PROCESAR_PDF_ACTIVADO: return
