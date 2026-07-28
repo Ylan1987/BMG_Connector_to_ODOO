@@ -224,7 +224,11 @@ def procesar_tapa(trabajo_actual):
         y_base = media_final_y1 - trim_y1_crudo - MARGEN_SOBRE_TRIM_PT
 
         if laminado:
-            doc[0].insert_text(fitz.Point(trim.x0, y_base), f"Laminado: {laminado}", fontsize=10)
+            bmg_corto = f"{limpiar_id(trabajo_actual['order_code'], 'PED')}-{trabajo_actual.get('line_number')}"
+            odoo_num = trabajo_actual.get('odoo_sale_order_name') or ''
+            cantidad = trabajo_actual.get('quantity_requested')
+            texto_linea = f"Laminado: {laminado} - Cantidad: {cantidad} - {bmg_corto} - {odoo_num}"
+            doc[0].insert_text(fitz.Point(trim.x0, y_base), texto_linea, fontsize=10)
 
         base_barcode = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
         barcode_text = f"{base_barcode}-{trabajo_actual.get('line_number')}" if base_barcode else None
