@@ -723,11 +723,38 @@ def run():
                     for of_id in ofs_encontradas_ids:
                         try:
                             of_hija_record = mrp_production_model.browse(of_id)
-                            
+
+                            # IMPORTANTE: guardar el nombre ORIGINAL (pre-renombre) antes de
+                            # tocar nada. Odoo, al crear automaticamente una OF nieta (ej.
+                            # "interior color", que es un sub-componente DENTRO de "interior",
+                            # no del libro) le pone de origin el name que tenia la OF padre en
+                            # ESE momento - que es este nombre corto original (tipo
+                            # "WH/MO/01649"), no el descriptivo que le ponemos aca abajo. Si
+                            # solo agregamos a origenes_a_buscar el nombre YA renombrado (como
+                            # se hacia antes), la busqueda de la siguiente vuelta del loop
+                            # nunca la encuentra porque su origin sigue siendo el nombre
+                            # corto que ya reemplazamos. Buscando por el ORIGINAL evitamos
+                            # ese agujero para cualquier profundidad de anidamiento.
+                            nombre_original_hija = of_hija_record.name
+
                             write_vals = {
-                                mapeos.ODOO_MRP_PRODUCTION_BMG_ORDER_LINE_FIELD: trabajo.get('line_number')
+                                mapeos.ODOO_MRP_PRODUCTION_BMG_ORDER_LINE_FIELD: trabajo.get('line_number'),
+                                # Corregimos tambien el origin explicitamente al pedido de
+                                # venta real (no solo el name) - asi cualquier OF nieta que
+                                # cuelgue de ESTA queda con la referencia correcta desde el
+                                # arranque, sin depender de que se la encuentre por casualidad.
+                                'origin': sale_order.name,
+                                # Unificamos el procurement_group_id con el del pedido de venta
+                                # (el mismo que ya se le asigna a la OF principal). Sin esto,
+                                # Odoo le crea a cada OF hija/nieta su PROPIO grupo separado, y
+                                # ni el boton nativo "Fabricacion" del pedido de venta las
+                                # encuentra mas alla de 1 nivel de profundidad (ver
+                                # sale_mrp.sale_order._compute_mrp_production_ids: solo mira
+                                # procurement_groups.mrp_production_ids + 1 nivel de
+                                # indireccion via stock_move_ids.created_production_id).
+                                'procurement_group_id': procurement_group_id,
                             }
-                            
+
                             nuevo_nombre = ""
                             product_name = of_hija_record.product_id.name or ""
                             book_title = trabajo.get('title', '')
@@ -739,18 +766,20 @@ def run():
                             elif product_name.startswith('[COMP-INT-COLOR]'):
                                 nuevo_nombre = f"{trabajo.get('order_code')}-{trabajo.get('line_number')} interior color de {book_title} (SO: {sale_order.name})"
 
-                            if nuevo_nombre and of_hija_record.name:
-                                write_vals['name'] = f"{of_hija_record.name} - {nuevo_nombre}"[:255]
+                            if nuevo_nombre and nombre_original_hija:
+                                write_vals['name'] = f"{nombre_original_hija} - {nuevo_nombre}"[:255]
 
-                            _logger.info(f"      -> Asignando datos (Line Number, Nombre) a OF hija {of_id}...")
-                            of_hija_record.write(write_vals) # Update name and custom line field on mrp.production
+                            _logger.info(f"      -> Asignando datos (Line Number, Nombre, Origin) a OF hija {of_id}...")
+                            of_hija_record.write(write_vals) # Update name, origin and custom line field on mrp.production
 
                             _logger.info(f"      -> Confirmando OF {of_id} ({of_hija_record.product_id.name})...")
                             of_hija_record.action_confirm()
-                            
-                            if of_hija_record.name:
-                                _logger.info(f"        -> Añadiendo nuevo origen a la búsqueda: '{of_hija_record.name}'")
-                                origenes_a_buscar.add(of_hija_record.name)
+
+                            # Buscamos por el nombre ORIGINAL (pre-renombre): las OF nietas
+                            # que Odoo ya haya creado usan ese, no el descriptivo nuevo.
+                            if nombre_original_hija:
+                                _logger.info(f"        -> Añadiendo nuevo origen a la búsqueda: '{nombre_original_hija}'")
+                                origenes_a_buscar.add(nombre_original_hija)
                             
                             ofs_procesadas.add(of_id)
                             time.sleep(0.5) 
