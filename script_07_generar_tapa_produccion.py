@@ -82,10 +82,16 @@ def encontrar_archivo_mas_reciente(directorio, title_id_limpio, tipo_archivo, or
     archivos_aptos = []; archivos_coherencia = []; archivos_totales = []
     es_edist = order_type == 'eDistrib. 1 a 1'
     PATRON_MASTER = r"MASTER"; PATRON_TAPA = r"(COVER|TAPA)"; PATRON_TAPA_GEN = r"(COVER|TAPA)"
-    
+    # Archivos de referencia/preview (auto-generados o de comprobación) que NUNCA
+    # pueden considerarse el archivo validado, aunque su nombre matchee el patron
+    # de tapa - ej. "{titulo}_TAPA_TRIMBOX_1.pdf" no es el validado por mas que
+    # tenga el sufijo _N.pdf esperado.
+    PALABRAS_NO_VALIDADAS = r"(MASTER|ORIGINAL|BACKUP|COMPROBACION|PRUEBA|MUESTRA|TRIMBOX|IMPO|MASTER_LOW|ORIGINAL_LOW)"
+
     patron_apto_pod = re.compile(f"^{re.escape(title_id_limpio)}_TAPA.*_(\\d+)\\.pdf$", re.IGNORECASE)
     patron_master_tipo = re.compile(PATRON_TAPA, re.IGNORECASE)
     patron_tipo_gen = re.compile(PATRON_TAPA_GEN, re.IGNORECASE)
+    patron_no_validado = re.compile(PALABRAS_NO_VALIDADAS, re.IGNORECASE)
     patron_exclusion = re.compile(r"(IMPO)", re.IGNORECASE)
 
     try:
@@ -95,9 +101,9 @@ def encontrar_archivo_mas_reciente(directorio, title_id_limpio, tipo_archivo, or
             except: continue
             if not es_edist and patron_tipo_gen.search(f) and not patron_exclusion.search(f):
                 archivos_totales.append({'fecha': mtime, 'ruta': ruta, 'nombre': f})
-            
+
             is_master = re.search(PATRON_MASTER, f, re.IGNORECASE)
-            match_pod = patron_apto_pod.match(f)
+            match_pod = patron_apto_pod.match(f) and not patron_no_validado.search(f)
             if es_edist and is_master and patron_master_tipo.search(f):
                 archivos_coherencia.append({'fecha': mtime, 'ruta': ruta, 'nombre': f})
             elif not es_edist and match_pod:
@@ -285,10 +291,10 @@ def run():
         conn = db_conn.conectar_db()
         if conn:
             cursor = conn.cursor()
-            placeholders = ','.join('?' for _ in mapeos.ESTADOS_A_EXCLUIR_PRODUCCION)
+            placeholders = ','.join('?' for _ in mapeos.ESTADOS_NO_CONFIRMABLES_PARA_OF)
             query = f"SELECT * FROM trabajos WHERE odoo_pickings_data_json IS NOT NULL AND estado_tapa_produccion = ? AND (line_status_id IS NULL OR line_status_id NOT IN ({placeholders}))"
-            
-            params = [mapeos.LOCAL_DB_STATUS_TAPA_PENDIENTE] + mapeos.ESTADOS_A_EXCLUIR_PRODUCCION
+
+            params = [mapeos.LOCAL_DB_STATUS_TAPA_PENDIENTE] + mapeos.ESTADOS_NO_CONFIRMABLES_PARA_OF
             cursor.execute(query, params)
             
             trabajos = [dict(row) for row in cursor.fetchall()]
