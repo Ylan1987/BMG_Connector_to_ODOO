@@ -103,7 +103,8 @@ def encontrar_archivo_mas_reciente(directorio, title_id_limpio, tipo_archivo, or
                 archivos_totales.append({'fecha': mtime, 'ruta': ruta, 'nombre': f})
 
             is_master = re.search(PATRON_MASTER, f, re.IGNORECASE)
-            match_pod = patron_apto_pod.match(f) and not patron_no_validado.search(f)
+            _m_apto = patron_apto_pod.match(f)
+            match_pod = _m_apto if _m_apto and not patron_no_validado.search(f) else None
             if es_edist and is_master and patron_master_tipo.search(f):
                 archivos_coherencia.append({'fecha': mtime, 'ruta': ruta, 'nombre': f})
             elif not es_edist and match_pod:
