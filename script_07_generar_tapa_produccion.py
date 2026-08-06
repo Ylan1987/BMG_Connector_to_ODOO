@@ -293,9 +293,11 @@ def run():
         if conn:
             cursor = conn.cursor()
             placeholders = ','.join('?' for _ in mapeos.ESTADOS_NO_CONFIRMABLES_PARA_OF)
-            query = f"SELECT * FROM trabajos WHERE odoo_pickings_data_json IS NOT NULL AND estado_tapa_produccion = ? AND (line_status_id IS NULL OR line_status_id NOT IN ({placeholders}))"
+            query = f"""SELECT * FROM trabajos WHERE odoo_pickings_data_json IS NOT NULL AND estado_tapa_produccion = ?
+                        AND (printing_facility IS NULL OR printing_facility = '' OR UPPER(printing_facility) = ?)
+                        AND (line_status_id IS NULL OR line_status_id NOT IN ({placeholders}))"""
 
-            params = [mapeos.LOCAL_DB_STATUS_TAPA_PENDIENTE] + mapeos.ESTADOS_NO_CONFIRMABLES_PARA_OF
+            params = [mapeos.LOCAL_DB_STATUS_TAPA_PENDIENTE, mapeos.BMG_PUBLISHER_FACILITY_LAD] + mapeos.ESTADOS_NO_CONFIRMABLES_PARA_OF
             cursor.execute(query, params)
             
             trabajos = [dict(row) for row in cursor.fetchall()]
