@@ -204,7 +204,7 @@ BMG_PUBLISHER_FACILITY_LAD = 'LAD'
 
 BMG_STATUS_ENTREGADO = 'ENTREGADO'
 BMG_STATUS_FACTURADO = 'FACTURADO'
-ODOO_ACTIVITY_TYPE_TODO = 'To Do'
+ODOO_ACTIVITY_TYPE_TODO = 'Por hacer'  # nombre real en esta instancia de Odoo (localizada en español); antes decia 'To Do' y no matcheaba ningun mail.activity.type
 ODOO_ACTIVITY_DEADLINE_DAYS = 1
 TASK_NAME_PREFIX_VALIDACION_DISENO = 'Validación Diseño - '
 TASK_DESCRIPTION_PREFIX_VALIDACION_DISENO = 'Validar diseño para '

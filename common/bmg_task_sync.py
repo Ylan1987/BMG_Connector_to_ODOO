@@ -51,19 +51,21 @@ def _update_opportunity_stage(odoo_api, opportunity_id, stage_name):
 def _create_activity(odoo_api, res_id, res_model, summary, user_id=None, date_deadline=None):
     """Crea una actividad programada en Odoo."""
     try:
+        model_ids = odoo_api.env['ir.model'].search([('model', '=', res_model)], limit=1)
+        activity_type_ids = odoo_api.env['mail.activity.type'].search([('name', '=', mapeos.ODOO_ACTIVITY_TYPE_TODO)], limit=1)
         activity_vals = {
             'res_id': res_id,
-            'res_model_id': odoo_api.env['ir.model']._get(res_model).id,
+            'res_model_id': model_ids[0],
             'summary': summary,
-            'activity_type_id': odoo_api.env['mail.activity.type'].search([('name', '=', mapeos.ODOO_ACTIVITY_TYPE_TODO)], limit=1).id,
+            'activity_type_id': activity_type_ids[0],
             'date_deadline': date_deadline if date_deadline else (datetime.now() + timedelta(days=mapeos.ODOO_ACTIVITY_DEADLINE_DAYS)).strftime('%Y-%m-%d'),
         }
         if user_id:
             activity_vals['user_id'] = user_id
 
         new_activity_id = odoo_api.env['mail.activity'].create(activity_vals)
-        _logger.info(f"Actividad '{summary}' creada para {res_model} ID {res_id}. ID Actividad: {new_activity_id.id}")
-        return new_activity_id.id
+        _logger.info(f"Actividad '{summary}' creada para {res_model} ID {res_id}. ID Actividad: {new_activity_id}")
+        return new_activity_id
     except Exception as e:
         _logger.error(f"Error al crear actividad '{summary}' para {res_model} ID {res_id}: {e}")
         return None
@@ -110,9 +112,9 @@ def _create_bmg_notification(odoo_api, order_code, order_line_number, bmg_state_
         if project_task_id:
             queue_vals['project_task_id'] = project_task_id
 
-        new_queue_record = odoo_api.env['bmg.notification.queue'].create(queue_vals)
-        _logger.info(f"Registro en bmg.notification.queue creado para Pedido BMG {order_code}-{order_line_number}, Estado BMG: {bmg_state_id}. ID: {new_queue_record.id}")
-        return new_queue_record.id
+        new_queue_record_id = odoo_api.env['bmg.notification.queue'].create(queue_vals)
+        _logger.info(f"Registro en bmg.notification.queue creado para Pedido BMG {order_code}-{order_line_number}, Estado BMG: {bmg_state_id}. ID: {new_queue_record_id}")
+        return new_queue_record_id
     except Exception as e:
         _logger.error(f"Error al crear registro en bmg.notification.queue para Pedido BMG {order_code}-{order_line_number}, Estado BMG {bmg_state_id}: {e}")
         return None
