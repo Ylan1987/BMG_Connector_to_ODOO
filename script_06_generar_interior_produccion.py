@@ -30,10 +30,17 @@ def obtener_cajas_normalizadas_pypdf(ruta_archivo):
             reader = pypdf.PdfReader(file)
             page = reader.pages[0]
             media = page.mediabox
+            crop = page.cropbox
             trim = page.get('/TrimBox')
             bleed = page.get('/BleedBox')
-            
-            tx, ty = -float(media[0]), -float(media[1])
+
+            # Normalizamos contra el CropBox (no el MediaBox): es el sistema de
+            # referencia que despues usa fitz internamente (show_pdf_page(clip=...))
+            # para el 'doc' que se abre con fitz.open(). Si se normaliza contra el
+            # MediaBox y el archivo trae un CropBox distinto (comun en masters con
+            # sangrado ya definido), el clip queda corrido exactamente esa diferencia
+            # y recorta contenido real (confirmado en PED00670400-20).
+            tx, ty = -float(crop[0]), -float(crop[1])
             
             res = {
                 'media': fitz.Rect(float(media[0])+tx, float(media[1])+ty, float(media[2])+tx, float(media[3])+ty)
