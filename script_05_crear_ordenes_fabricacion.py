@@ -375,9 +375,21 @@ def run():
                         ('origin', '=', so_prev.name),
                         (mapeos.ODOO_MRP_PRODUCTION_BMG_ORDER_LINE_FIELD, '=', line_number),
                     ]))
+                # Solo se tocan OFs en estados que garantizan que NO arrancó trabajo
+                # real todavía. 'progress' (un operario trabajando en este momento) y
+                # 'done' (producción real ya terminada) NUNCA se cancelan ni se borran
+                # acá - quedan intactas y se avisa para revisión manual. Mejor dejar
+                # un resto sospechoso a mano que borrar trabajo físico real por error.
+                ESTADOS_SEGUROS_PARA_LIMPIAR = {'draft', 'confirmed', 'waiting', 'ready', 'pending', 'to_close'}
                 for of_id_limpiar in of_ids_a_limpiar:
                     of_limpiar = mrp_production_model.browse(of_id_limpiar)
-                    if of_limpiar.state not in ('done', 'cancel'):
+                    estado_actual = of_limpiar.state
+                    if estado_actual == 'cancel':
+                        pass  # ya cancelada, solo falta el unlink
+                    elif estado_actual not in ESTADOS_SEGUROS_PARA_LIMPIAR:
+                        _logger.warning(f"      -> ⚠️ OF {of_limpiar.name} (id {of_id_limpiar}) está en estado '{estado_actual}' (no es un simple resto del intento fallido) — NO se toca, requiere revisión manual.")
+                        continue
+                    else:
                         try:
                             of_limpiar.action_cancel()
                             _logger.info(f"      -> OF {of_limpiar.name} (id {of_id_limpiar}) cancelada.")
