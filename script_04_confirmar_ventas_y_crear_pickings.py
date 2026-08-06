@@ -52,6 +52,25 @@ def _es_estado_confirmable(line_status_id):
     except (ValueError, TypeError):
         return False
 
+def _eliminar_pickings_auto_generados(odoo_api, so_id, order_code):
+    """
+    Cancela y elimina cualquier picking (IN o OUT) que Odoo haya generado
+    automáticamente al confirmar la SO. Se usa para pedidos de filial externa
+    (printing_facility != LAD), donde ni la producción ni el envío corren por
+    nuestra cuenta, así que no debe quedar ninguna transferencia de stock local.
+    """
+    try:
+        picking_model = odoo_api.env['stock.picking']
+        auto_pick_ids = picking_model.search([('sale_id', '=', so_id), ('state', '!=', 'cancel')])
+        for pick_id in auto_pick_ids:
+            picking = picking_model.browse(pick_id)
+            picking_name = picking.name
+            picking.action_cancel()
+            picking.unlink()
+            print(f"  -> 🗑️ Picking auto-generado por Odoo eliminado (filial externa): {picking_name}")
+    except Exception as e:
+        _logger.error(f"  -> ❌ Error al eliminar pickings auto-generados para {order_code} (SO ID: {so_id}): {e}")
+
 def _obtener_o_crear_contacto_envio(odoo_api, cliente_principal_id, envio_data):
     """
     Busca o crea un contacto de envío como entidad independiente (suelto).
@@ -317,6 +336,7 @@ def run():
         partner_id = pedido_cabecera['odoo_partner_id']
         print(f"\n--- Procesando Pedido: {order_code} (SO ID: {so_id}) ---")
 
+        es_facility_externa = False
         try: # Main try block for each order
             if not _es_estado_confirmable(pedido_cabecera['line_status_id']):
                 print(f"  -> ℹ️ Pedido {order_code} (SO ID: {so_id}) no está en un estado BMG confirmable (Estado BMG: {pedido_cabecera['line_status_id']}). Saltando.")
@@ -346,25 +366,36 @@ def run():
                     print(f"  -> ❌ Error al publicar en Chatter para SO ID {so_id}: {chat_e}")
                 continue
 
-            print(f"  -> Creando transferencias de stock (pickings)...")
-            pickings_data = generar_transferencias_envio_odoo(
-                odoo_api, so_id, partner_id,
-                pedido_cabecera['datos_envio_json'], grupo_trabajos
-            )
+            printing_facility = (pedido_cabecera.get('printing_facility') or '').strip().upper()
+            es_facility_externa = bool(printing_facility) and printing_facility != mapeos.BMG_PUBLISHER_FACILITY_LAD
 
-            if not pickings_data:
-                mensaje_error = f"No se pudieron crear los pickings para el pedido {order_code} (SO ID: {so_id}). El pedido no se confirmará."
-                asunto = f"Error Script 04: No se crearon pickings para pedido {order_code}"
-                enviar_email(asunto, mensaje_error)
-                try:
-                    so_record = odoo_api.env['sale.order'].browse(so_id)
-                    so_record.message_post(body=mensaje_error, message_type=mapeos.CHATTER_MESSAGE_TYPE_COMMENT, subtype_xmlid=mapeos.CHATTER_SUBTYPE_XMLID_NOTE)
-                except Exception as chat_e:
-                    print(f"  -> ❌ Error al publicar en Chatter para SO ID {so_id}: {chat_e}")
-                continue            
+            if es_facility_externa:
+                print(f"  -> ℹ️ Filial externa ('{printing_facility}'): la produce y despacha BMG, no se generan pickings locales para {order_code}.")
+                pickings_data = []
+            else:
+                print(f"  -> Creando transferencias de stock (pickings)...")
+                pickings_data = generar_transferencias_envio_odoo(
+                    odoo_api, so_id, partner_id,
+                    pedido_cabecera['datos_envio_json'], grupo_trabajos
+                )
+
+                if not pickings_data:
+                    mensaje_error = f"No se pudieron crear los pickings para el pedido {order_code} (SO ID: {so_id}). El pedido no se confirmará."
+                    asunto = f"Error Script 04: No se crearon pickings para pedido {order_code}"
+                    enviar_email(asunto, mensaje_error)
+                    try:
+                        so_record = odoo_api.env['sale.order'].browse(so_id)
+                        so_record.message_post(body=mensaje_error, message_type=mapeos.CHATTER_MESSAGE_TYPE_COMMENT, subtype_xmlid=mapeos.CHATTER_SUBTYPE_XMLID_NOTE)
+                    except Exception as chat_e:
+                        print(f"  -> ❌ Error al publicar en Chatter para SO ID {so_id}: {chat_e}")
+                    continue
+
             print(f"  -> Confirmando Pedido de Venta SO ID: {so_id}...")
             odoo_api.env['sale.order'].browse([so_id]).action_confirm()
             print(f"  -> ✅ Pedido {order_code} confirmado en Odoo.")
+
+            if es_facility_externa:
+                _eliminar_pickings_auto_generados(odoo_api, so_id, order_code)
 
             # --- LÓGICA DE FACTURACIÓN AUTOMÁTICA PARA MERCADO LIBRE ---
             if mapeos.ML_FACTURACION_AUTOMATICA:
@@ -537,7 +568,10 @@ def run():
             
             if is_state_error:
                 print(f"  -> ℹ️ Pedido {order_code} (SO ID: {so_id}) ya estaba confirmado de antemano. El proceso continúa como si fuera exitoso.")
-                
+
+                if es_facility_externa:
+                    _eliminar_pickings_auto_generados(odoo_api, so_id, order_code)
+
                 # --- Se repite la lógica de éxito aquí para asegurar la consistencia de los datos ---
                 opportunity_id = pedido_cabecera.get('odoo_opportunity_id_agg')
                 if opportunity_id:
