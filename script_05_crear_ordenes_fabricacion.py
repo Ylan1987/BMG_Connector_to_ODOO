@@ -775,11 +775,26 @@ def run():
                 origenes_a_buscar = {nombre_origen_so}
                 ofs_procesadas = {new_of_id}
 
+                # Los pedidos de varias líneas comparten el mismo origin (el nombre
+                # del SO), así que buscar solo por origin no alcanza para distinguir
+                # las OF hijas/nietas de ESTA línea de las de otra línea del mismo
+                # pedido que haya quedado a medias por otro motivo (ver PED00671318-9
+                # vs -10: la línea 10 encontró y renombró OFs que en realidad eran de
+                # la línea 9). Se acota además por el default_code determinístico de
+                # los componentes esperados de ESTA línea puntual, que nunca puede
+                # coincidir con el de otra línea.
+                codigos_hijas_posibles = [
+                    f"COMP-TAPA-{trabajo['order_code']}-{trabajo['line_number']}",
+                    f"COMP-INT-{trabajo['order_code']}-{trabajo['line_number']}",
+                    f"SUBCOMP-INT-C-{trabajo['order_code']}-{trabajo['line_number']}",
+                ]
+
                 while True:
-                    _logger.info(f"  - Buscando OFs en borrador con orígenes: {list(origenes_a_buscar)}")
-                    
+                    _logger.info(f"  - Buscando OFs en borrador con orígenes: {list(origenes_a_buscar)} (acotado a productos de esta línea)")
+
                     ofs_encontradas_ids = mrp_production_model.search([
                         ('origin', 'in', list(origenes_a_buscar)),
+                        ('product_id.default_code', 'in', codigos_hijas_posibles),
                         ('state', '=', 'draft'),
                         ('id', 'not in', list(ofs_procesadas))
                     ])
