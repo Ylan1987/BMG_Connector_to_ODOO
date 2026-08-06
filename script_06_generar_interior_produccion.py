@@ -168,11 +168,28 @@ def crear_pagina_orden_de_trabajo(trabajo_actual):
                             pix_tapa = page_tapa.get_pixmap(clip=clip_rect)
                             
                             page.insert_image(rect_img, pixmap=pix_tapa, keep_proportion=True)
-                            
+
                             img_data = pix_tapa.tobytes("png")
                             trabajo_actual['b64_tapa'] = base64.b64encode(img_data).decode('utf-8')
                 except Exception as e:
                     print(f"      ADVERTENCIA: No se pudo insertar la imagen de la tapa recortada. Error: {e}")
+
+                # 3. Caso de emergencia: si el recorte falló, usar la tapa completa sin recortar
+                if not trabajo_actual.get('b64_tapa'):
+                    try:
+                        import base64
+                        with fitz.open(ruta_tapa) as doc_tapa:
+                            if doc_tapa.page_count > 0:
+                                page_tapa = doc_tapa[0]
+                                pix_tapa = page_tapa.get_pixmap()
+
+                                page.insert_image(rect_img, pixmap=pix_tapa, keep_proportion=True)
+
+                                img_data = pix_tapa.tobytes("png")
+                                trabajo_actual['b64_tapa'] = base64.b64encode(img_data).decode('utf-8')
+                                print("      INFO: Recorte de tapa falló, se usó la tapa completa sin recortar (caso de emergencia).")
+                    except Exception as e:
+                        print(f"      ADVERTENCIA: No se pudo insertar la tapa completa (caso de emergencia). Error: {e}")
 
         base_barcode = trabajo_actual.get('odoo_sale_order_name') or trabajo_actual.get('order_code')
         barcode_text = f"{base_barcode}-{trabajo_actual.get('line_number')}" if base_barcode else None
