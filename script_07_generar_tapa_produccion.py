@@ -363,6 +363,16 @@ def run():
                         body = f"⚠️ **Producción Tapa:** {error_msg}\nTitleID: {tid}"
                         so.message_post(body=body)
                 except: pass
+        else:
+            # No se encontró la carpeta de origen en el NAS (ni la guardada ni
+            # buscandola dinamicamente) - se mantiene en PENDIENTE y se reintenta
+            # en cada corrida, pero avisamos para no depender de mirar el log.
+            try:
+                if odoo_api and t.get('odoo_sale_order_id'):
+                    so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
+                    body = f"⚠️ **Producción Tapa:** No se encontró la carpeta de origen en el NAS para este título.\nTitleID: {tid}"
+                    so.message_post(body=body)
+            except: pass
 
 if __name__ == "__main__":
     run()

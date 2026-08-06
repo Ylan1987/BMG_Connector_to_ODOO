@@ -651,6 +651,15 @@ def run():
                         body = f"⚠️ **Producción Interior:** {error_msg}\nTitleID: {tid}"
                         so.message_post(body=body)
                 except: pass
+        else:
+            # No hay ruta_trabajo todavia (deberia haberla dejado Script 7 al
+            # generar la tapa) - avisamos en vez de quedar en silencio.
+            try:
+                if odoo_api and t.get('odoo_sale_order_id'):
+                    so = odoo_api.env['sale.order'].browse(t['odoo_sale_order_id'])
+                    body = f"⚠️ **Producción Interior:** No se encontró la carpeta de origen en el NAS para este título.\nTitleID: {tid}"
+                    so.message_post(body=body)
+            except: pass
 
 if __name__ == "__main__":
     run()
