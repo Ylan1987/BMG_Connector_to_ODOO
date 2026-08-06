@@ -258,6 +258,12 @@ CHATTER_SUBTYPE_XMLID_NOTE = 'mail.mt_note'
 
 
 LOCAL_DB_STATUS_OF_CREADA = 'OF_CREADA'
+# Marca escrita ANTES de tocar Odoo en script_05, y reemplazada por OF_CREADA
+# recien al terminar todo el proceso con exito. Si una corrida muere a mitad
+# de camino (ej. 502 de Odoo), el trabajo queda en este estado y la proxima
+# corrida limpia lo que haya quedado a medio crear antes de reintentar, en
+# vez de crear una OF nueva encima (ver Script 5, bloque de recuperacion).
+LOCAL_DB_STATUS_OF_EN_PROCESO = 'OF_EN_PROCESO'
 ODOO_MRP_PRODUCTION_BMG_ORDER_LINE_FIELD = 'x_bmg_order_line'
 ESTADOS_NO_CONFIRMABLES_PARA_OF = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 33, 34, 36, 37, 38, 42, 43, 44, 45, 48, 53, 99, 204, 205, 234]
 

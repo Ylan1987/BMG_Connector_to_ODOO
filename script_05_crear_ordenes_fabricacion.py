@@ -345,9 +345,66 @@ def run():
             continue
         # <<< FIN: Omitir OF para trabajos de producción externa >>>
 
-        # <<< FIN: Omitir OF para trabajos de producción externa >>>
-
         try:
+            # <<< INICIO: Recuperación de un intento anterior cortado a mitad de camino >>>
+            # Si la corrida anterior murió (ej. 502 de Odoo) después de crear la OF
+            # Libro pero antes de terminar todo el flujo, el trabajo quedó marcado
+            # OF_EN_PROCESO en vez de OF_CREADA. Antes de reintentar, hay que limpiar
+            # cualquier OF (Libro/Tapa/Interior/interior-color) que haya quedado de
+            # ese intento, si no, este bloque crearía una OF Libro NUEVA encima de la
+            # vieja sin darse cuenta (esto pasó de verdad, ver PED00671318-9).
+            #
+            # Se busca por default_code de los componentes (determinístico desde el
+            # arranque, no depende de que el renombrado/tageo del intento anterior
+            # haya llegado a completarse) más por origin+línea para la OF Libro
+            # (esa sí queda tageada en el mismo create()).
+            if trabajo.get('estado_fabricacion') == mapeos.LOCAL_DB_STATUS_OF_EN_PROCESO:
+                _logger.warning(f"    -> ⚠️ Intento anterior para {order_code}-{line_number} quedó a mitad de camino (OF_EN_PROCESO). Limpiando antes de reintentar...")
+                codigos_a_limpiar = [
+                    f"COMP-TAPA-{order_code}-{line_number}",
+                    f"COMP-INT-{order_code}-{line_number}",
+                    f"SUBCOMP-INT-C-{order_code}-{line_number}",
+                ]
+                of_ids_a_limpiar = set(mrp_production_model.search([
+                    ('product_id.default_code', 'in', codigos_a_limpiar)
+                ]))
+                so_id_prev = trabajo.get('odoo_sale_order_id')
+                if so_id_prev:
+                    so_prev = so_model.browse(so_id_prev)
+                    of_ids_a_limpiar |= set(mrp_production_model.search([
+                        ('origin', '=', so_prev.name),
+                        (mapeos.ODOO_MRP_PRODUCTION_BMG_ORDER_LINE_FIELD, '=', line_number),
+                    ]))
+                for of_id_limpiar in of_ids_a_limpiar:
+                    of_limpiar = mrp_production_model.browse(of_id_limpiar)
+                    if of_limpiar.state not in ('done', 'cancel'):
+                        try:
+                            of_limpiar.action_cancel()
+                            _logger.info(f"      -> OF {of_limpiar.name} (id {of_id_limpiar}) cancelada.")
+                        except Exception as e_cancel:
+                            _logger.warning(f"      -> No se pudo cancelar OF {of_id_limpiar}, se deja para revisión manual: {e_cancel}")
+                            continue
+                    try:
+                        mrp_production_model.browse(of_id_limpiar).unlink()
+                        _logger.info(f"      -> OF {of_id_limpiar} eliminada.")
+                    except Exception as e_unlink:
+                        _logger.warning(f"      -> No se pudo eliminar OF {of_id_limpiar}, se deja cancelada para revisión manual: {e_unlink}")
+                if of_ids_a_limpiar:
+                    _logger.info(f"    -> Limpieza completa: {len(of_ids_a_limpiar)} OF(s) del intento anterior procesadas.")
+                else:
+                    _logger.info("    -> No se encontró nada que limpiar del intento anterior.")
+
+            # Marcar como "en proceso" ANTES de tocar Odoo, para que si esta corrida
+            # también se corta a mitad de camino, la próxima sepa que tiene que limpiar
+            # en vez de crear todo de nuevo encima.
+            conn_marca = db_conn.conectar_db(); cursor_marca = conn_marca.cursor()
+            cursor_marca.execute(
+                f"UPDATE trabajos SET estado_fabricacion = '{mapeos.LOCAL_DB_STATUS_OF_EN_PROCESO}' WHERE order_code = ? AND line_number = ?",
+                (order_code, line_number)
+            )
+            conn_marca.commit(); conn_marca.close()
+            # <<< FIN: Recuperación / marca de en-proceso >>>
+
             # 1. OBTENER PRODUCTO FINAL Y DETERMINAR FLUJO
             libro_product_id = trabajo.get('odoo_product_variant_id')
             if not libro_product_id:
