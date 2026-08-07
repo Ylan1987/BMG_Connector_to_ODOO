@@ -254,7 +254,13 @@ def gestionar_contacto_mercadolibros(odoo_api, trabajo):
         id_facturacion = partner_model.create(partner_vals)
     except Exception as e: print(f"  -> ❌ Error: {e}"); return None, None
     id_envio = id_facturacion
-    if "retira en lad" in direccion:
+    empresa = envio.get('Empresa', '').strip().lower()
+    es_retira_en_lad = (
+        'retira en lad' in normalize_text(direccion)
+        or 'retira en lad' in normalize_text(empresa)
+        or 'convencion 1319' in normalize_text(direccion)
+    )
+    if es_retira_en_lad:
         ids_lad = partner_model.search([('name', '=', mapeos.ODOO_PARTNER_RETIRA_IMPrenta)])
         if ids_lad: id_envio = ids_lad[0]
     elif mapeos.ODOO_SHIPPING_METHOD_MERCADOENVIOS.lower() in direccion: partner_model.write([id_facturacion], {'street': f"{mapeos.ODOO_SHIPPING_METHOD_MERCADOENVIOS}: {envio.get('Direccion', '')}", 'city': ciudad})
