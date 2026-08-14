@@ -426,6 +426,18 @@ def run():
             has_color_insert = trabajo.get('color_insert') == 'YES' and int(trabajo.get('color_pages', 0)) > 0
             interior_final_product_id = None
 
+            # Duracion real por tarea (duration_expected), para el board de
+            # Planificacion Visual (nesta_ui_produccion). Se va llenando mas
+            # abajo, en cada rama, con los datos reales YA calculados ahi
+            # mismo (hojas necesarias, papel, cantidad) - nunca se recalculan
+            # aparte. Se escribe en los workorders reales recien mas abajo,
+            # una vez que la OF y sus hijas/nietas ya existen de verdad.
+            duraciones_calculadas = {}
+            try:
+                cantidad_libros = int(trabajo.get('quantity_requested') or 1)
+            except (ValueError, TypeError):
+                cantidad_libros = 1
+
             # 2. PROCESAR TAPA
             _logger.info("  - Preparando LdM para la TAPA...")
             tapa_product_name = f"[TAPA] {trabajo['title']}"
@@ -494,6 +506,22 @@ def run():
                 _logger.info(f"    -> Lógica {laminado_nombre}: Solo Componente de Laminado")
                 agregar_componente_laminado(laminado_nombre)
             
+            for op_tapa in tapa_operations:
+                dur_min = None
+                if op_tapa['name'] == 'Imprimir Tapa':
+                    dur_min = mapeos.min_imprimir_tapa(cantidad_libros, tamaño_papel_tapa)
+                elif op_tapa['name'] == 'Guillotinar Tapa':
+                    dur_min = mapeos.min_guillotinar_tapa(cantidad_libros)
+                elif op_tapa['name'] == 'Laminar':
+                    dur_min = mapeos.min_laminar(cantidad_libros, tamaño_papel_tapa)
+                elif op_tapa['name'] == 'Barnizar':
+                    dur_min = mapeos.min_barnizar(cantidad_libros, tamaño_papel_tapa)
+                if dur_min is not None:
+                    duraciones_calculadas[op_tapa['name']] = dur_min
+                    _logger.info(f"    -> Duración calculada '{op_tapa['name']}' (tapa, {cantidad_libros} ej., tamaño {tamaño_papel_tapa}): {dur_min:.1f} min")
+                else:
+                    _logger.warning(f"    ⚠️ No se pudo calcular duración para '{op_tapa['name']}' (tapa, tamaño '{tamaño_papel_tapa}' sin rate en mapeos) - Odoo usará su valor por defecto.")
+
             crear_ldm(odoo_api, tapa_product_id, tapa_components, tapa_operations, trabajo)
 
             # 3. PROCESAR INTERIOR(ES)
@@ -559,6 +587,16 @@ def run():
                     {'name': 'Imprimir Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_8310'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_BYN'},
                     {'name': 'Guillotinar Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['GUILLOTINA'], 'bmg_op_key': 'GUILLOTINAR_INTERIOR'},
                 ]
+                dur_imprimir = mapeos.min_imprimir_interior(hojas_necesarias, papel_folder, workcenter='8310')
+                dur_guillotinar = mapeos.min_guillotinar_interior_inicial(cantidad_libros)
+                if dur_imprimir is not None:
+                    duraciones_calculadas['Imprimir Interior'] = dur_imprimir
+                    _logger.info(f"    -> Duración calculada 'Imprimir Interior' (ByN, {hojas_necesarias} hojas, papel {papel_folder}, 8310): {dur_imprimir:.1f} min")
+                else:
+                    _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior' - papel '{papel_folder}' sin rate en mapeos.RATE_8310_PAG_MIN. Odoo usará su valor por defecto.")
+                duraciones_calculadas['Guillotinar Interior'] = dur_guillotinar
+                _logger.info(f"    -> Duración calculada 'Guillotinar Interior' ({cantidad_libros} ej.): {dur_guillotinar:.1f} min")
+
                 crear_ldm(odoo_api, interior_final_product_id, interior_components, interior_operations, trabajo)
 
             elif es_solo_color:
@@ -596,6 +634,13 @@ def run():
                 color_components = [{'product_id': papel_cortado_color_product_id[0], 'quantity': hojas_color_necesarias}]
                 
                 color_operations = [{'name': 'Imprimir Interior Color', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_7200'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_COLOR'}]
+                dur_color = mapeos.min_imprimir_interior(hojas_color_necesarias, papel_folder, workcenter='7200')
+                if dur_color is not None:
+                    duraciones_calculadas['Imprimir Interior Color'] = dur_color
+                    _logger.info(f"    -> Duración calculada 'Imprimir Interior Color' (100% color, {hojas_color_necesarias} hojas, papel {papel_folder}): {dur_color:.1f} min")
+                else:
+                    _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior Color' - papel '{papel_folder}' sin rate en mapeos.RATE_7200_INTERIOR_PAG_MIN. Odoo usará su valor por defecto.")
+
                 crear_ldm(odoo_api, interior_final_product_id, color_components, color_operations, trabajo)
 
             elif es_mixto:
@@ -632,6 +677,13 @@ def run():
                 hojas_color_necesarias = math.ceil(color_pages / pages_per_sheet)
                 color_components = [{'product_id': papel_cortado_color_product_id[0], 'quantity': hojas_color_necesarias}]
                 color_operations = [{'name': 'Imprimir Interior Color', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_7200'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_COLOR'}]
+                dur_color = mapeos.min_imprimir_interior(hojas_color_necesarias, papel_folder, workcenter='7200')
+                if dur_color is not None:
+                    duraciones_calculadas['Imprimir Interior Color'] = dur_color
+                    _logger.info(f"    -> Duración calculada 'Imprimir Interior Color' (mixto, {hojas_color_necesarias} hojas, papel {papel_folder}): {dur_color:.1f} min")
+                else:
+                    _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior Color' - papel '{papel_folder}' sin rate en mapeos.RATE_7200_INTERIOR_PAG_MIN. Odoo usará su valor por defecto.")
+
                 crear_ldm(odoo_api, color_interior_component_id, color_components, color_operations, trabajo)
 
                 _logger.info("  - Preparando LdM para el INTERIOR (Mixto, compaginado)...")
@@ -676,6 +728,16 @@ def run():
                     {'name': 'Imprimir Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_8310'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_BYN'},
                     {'name': 'Guillotinar Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['GUILLOTINA'], 'bmg_op_key': 'GUILLOTINAR_INTERIOR'},
                 ]
+                dur_imprimir = mapeos.min_imprimir_interior(hojas_byn_necesarias, papel_folder, workcenter='8310')
+                dur_guillotinar = mapeos.min_guillotinar_interior_inicial(cantidad_libros)
+                if dur_imprimir is not None:
+                    duraciones_calculadas['Imprimir Interior'] = dur_imprimir
+                    _logger.info(f"    -> Duración calculada 'Imprimir Interior' (mixto ByN, {hojas_byn_necesarias} hojas, papel {papel_folder}, 8310): {dur_imprimir:.1f} min")
+                else:
+                    _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior' - papel '{papel_folder}' sin rate en mapeos.RATE_8310_PAG_MIN. Odoo usará su valor por defecto.")
+                duraciones_calculadas['Guillotinar Interior'] = dur_guillotinar
+                _logger.info(f"    -> Duración calculada 'Guillotinar Interior' (mixto, {cantidad_libros} ej.): {dur_guillotinar:.1f} min")
+
                 crear_ldm(odoo_api, interior_final_product_id, final_interior_components, final_interior_operations, trabajo)
             
             else:
@@ -693,6 +755,14 @@ def run():
                 {'name': 'Guillotinado Final', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['GUILLOTINA'], 'bmg_op_key': 'GUILLOTINADO_FINAL'},
                 {'name': 'Empacar', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['EMPAQUETADORA'], 'bmg_op_key': 'EMPACAR'},
             ]
+            total_pages_libro = bw_pages + color_pages
+            duraciones_calculadas['Juntar Tapas e Interior'] = mapeos.min_juntar_tapas_interior()
+            duraciones_calculadas['Encuadernar'] = mapeos.min_encuadernar(cantidad_libros)
+            duraciones_calculadas['Guillotinado Final'] = mapeos.min_guillotinado_final(cantidad_libros, total_pages_libro)
+            duraciones_calculadas['Empacar'] = mapeos.min_empacar(cantidad_libros)
+            for op_name_libro in ('Juntar Tapas e Interior', 'Encuadernar', 'Guillotinado Final', 'Empacar'):
+                _logger.info(f"    -> Duración calculada '{op_name_libro}' (libro, {cantidad_libros} ej., {total_pages_libro} páginas totales): {duraciones_calculadas[op_name_libro]:.1f} min")
+
             crear_ldm(odoo_api, libro_product_id, final_components, final_operations, trabajo)
 
             _logger.info("  - Creando Orden de Fabricación principal...")
@@ -890,6 +960,39 @@ def run():
                         _logger.info(f"    -> Imagen de tapa enlazada a {len(ofs_del_trabajo_ids)} OF(s) del trabajo.")
             except Exception as e_img:
                 _logger.warning(f"    ⚠️ No se pudo enlazar la imagen de tapa a las OF: {e_img}")
+
+            # --- Escribir duration_expected calculada en los workorders reales ---
+            # Se hace DESPUES de que existan de verdad todas las OF (principal +
+            # hijas/nietas), matcheando por nombre de operacion contra
+            # duraciones_calculadas (poblado mas arriba, en cada rama, con los
+            # datos reales de ESTE trabajo). Nunca tocar mrp.workorder via
+            # .browse() ni via el campo relacional workorder_ids en un
+            # mrp.production ya "browseado" - eso rompio antes con 'Object of
+            # type mrp_workorder is not JSON serializable' (ver
+            # script_fix_bmg_estados.py). Se usa search_read + write con ids
+            # planos, igual que ahi.
+            # Si el planificador despues reasigna la maquina (8310 -> 8420),
+            # ese valor se recalcula en ese momento, no aca.
+            try:
+                ofs_del_trabajo_ids_dur = mrp_production_model.search([
+                    ('origin', '=', sale_order.name),
+                    (mapeos.ODOO_MRP_PRODUCTION_BMG_ORDER_LINE_FIELD, '=', line_number),
+                ])
+                workorders_data = odoo_api.env['mrp.workorder'].search_read(
+                    [('production_id', 'in', list(ofs_del_trabajo_ids_dur))],
+                    ['id', 'name']
+                )
+                total_actualizados = 0
+                for wo_data in workorders_data:
+                    dur_min = duraciones_calculadas.get(wo_data.get('name'))
+                    if dur_min is not None:
+                        odoo_api.env['mrp.workorder'].write([wo_data['id']], {'duration_expected': dur_min})
+                        total_actualizados += 1
+                    else:
+                        _logger.warning(f"    ⚠️ Workorder '{wo_data.get('name')}' (id {wo_data['id']}) sin duración calculada - queda con el valor por defecto de Odoo.")
+                _logger.info(f"    -> ✅ duration_expected escrita en {total_actualizados}/{len(workorders_data)} workorder(s) de las {len(ofs_del_trabajo_ids_dur)} OF del trabajo.")
+            except Exception as e_dur:
+                _logger.warning(f"    ⚠️ No se pudo escribir duration_expected en los workorders: {e_dur}")
 
             conn_update = db_conn.conectar_db()
             cursor_update = conn_update.cursor()

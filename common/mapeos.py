@@ -8,6 +8,7 @@ diccionarios desde aquí.
 import os
 import json
 import logging
+import math
 from . import config_log
 from datetime import datetime, timedelta
 
@@ -159,6 +160,107 @@ MAPEO_CENTROS_TRABAJO = {
     'ENCUADERNADORA_HORIZON': '__export__.mrp_workcenter_horizon',
     'EMPAQUETADORA': '__export__.mrp_workcenter_empaquetadora_termocontraible_dibipack_4255',
 }
+
+# ============================================================================
+# TIEMPOS DE PRODUCCION POR TAREA (para duration_expected de mrp.workorder)
+# ----------------------------------------------------------------------------
+# Fuente: reglas confirmadas con el usuario en planificacion/
+# REGLAS_PLANIFICACION_PRODUCCION.md y verificadas contra datos reales de
+# Odoo (2026-08-07). Si mañana cambia la velocidad de una maquina, tocar
+# SOLO esta seccion - script_05 llama a las funciones de mas abajo, nunca
+# hardcodea un numero de tiempo directamente.
+# ============================================================================
+
+# paginas/min por formato de papel (RATE_8420 usa los mismos valores que
+# RATE_8310 en 23x32, pero es mas rapida en 25x35 - confirmado por separado)
+RATE_8310_PAG_MIN = {'23x32': 75, '25x35': 65}
+RATE_8420_PAG_MIN = {'23x32': 75, '25x35': 90}
+RATE_7200_INTERIOR_PAG_MIN = {'23x32': 55, '25x35': 65}
+RATE_7200_TAPA_UNID_MIN = {'33x36': 40, '33x48.7': 30, '33x70': 20}
+
+TOL_IMPRESION = 0.05  # +5% de margen sobre el tiempo teorico de impresion
+
+SETUP_IMPRESION_MIN = 2
+SETUP_GUILLOTINA_MIN = 2
+SETUP_LAMINADO_MIN = 1
+SETUP_ENCUADERNADO_MIN = 2
+SETUP_EMPACAR_SEG = 20
+SETUP_BARNIZADO_MIN = 10  # postura del barniz, reemplaza SETUP_IMPRESION_MIN normal
+
+RATE_LAMINADO_SEG_TAPA = {'33x36': 5, '33x48.7': 7, '33x70': 10}
+SEG_ENCUADERNAR_LIBRO = 18
+SEG_CORTE_FINAL = 20
+MIN_CORTE_INICIAL_LIBRO = 0.1
+SEG_JUNTAR_TAPAS_TITULO = 30
+LIBROS_POR_TANDA_EMPAQUE = 20
+MIN_EMPAQUE_TANDA = 3
+
+
+def min_imprimir_interior(hojas, formato_papel, workcenter='8310'):
+    """Imprimir Interior / Imprimir Interior Color (byn en 8310/8420, color en 7200)."""
+    rate = {'8310': RATE_8310_PAG_MIN, '8420': RATE_8420_PAG_MIN,
+            '7200': RATE_7200_INTERIOR_PAG_MIN}[workcenter].get(formato_papel)
+    if not rate:
+        return None
+    hojas_min = rate / 2  # 2 paginas por hoja (2up)
+    return hojas / hojas_min * (1 + TOL_IMPRESION) + SETUP_IMPRESION_MIN
+
+
+def min_imprimir_tapa(cantidad, tamaño_tapa):
+    rate = RATE_7200_TAPA_UNID_MIN.get(tamaño_tapa)
+    if not rate:
+        return None
+    return cantidad / rate * (1 + TOL_IMPRESION) + SETUP_IMPRESION_MIN
+
+
+def min_barnizar(cantidad, tamaño_tapa):
+    """Confirmado con el usuario 2026-08-07: el doble del tiempo de
+    impresion normal en la 7200 (sin su propio setup) + 10min de postura
+    (en vez del setup normal de impresion)."""
+    rate = RATE_7200_TAPA_UNID_MIN.get(tamaño_tapa)
+    if not rate:
+        return None
+    tiempo_impresion_sin_setup = cantidad / rate * (1 + TOL_IMPRESION)
+    return 2 * tiempo_impresion_sin_setup + SETUP_BARNIZADO_MIN
+
+
+def min_guillotinar_tapa(cantidad):
+    corte = 1 if cantidad <= 10 else math.ceil(cantidad / 100) * 2
+    return corte + SETUP_GUILLOTINA_MIN
+
+
+def min_guillotinar_interior_inicial(cantidad_libros):
+    return cantidad_libros * MIN_CORTE_INICIAL_LIBRO + SETUP_GUILLOTINA_MIN
+
+
+def min_guillotinado_final(cantidad_libros, total_pages):
+    if total_pages < 200:
+        grupo = 3
+    elif total_pages < 400:
+        grupo = 2
+    else:
+        grupo = 1
+    n = math.ceil(cantidad_libros / grupo)
+    return n * SEG_CORTE_FINAL / 60 + SETUP_GUILLOTINA_MIN
+
+
+def min_laminar(cantidad_tapas, tamaño_tapa):
+    seg_tapa = RATE_LAMINADO_SEG_TAPA.get(tamaño_tapa, 7)
+    return cantidad_tapas * seg_tapa / 60 + SETUP_LAMINADO_MIN
+
+
+def min_juntar_tapas_interior():
+    return SEG_JUNTAR_TAPAS_TITULO / 60
+
+
+def min_encuadernar(cantidad_libros):
+    return cantidad_libros * SEG_ENCUADERNAR_LIBRO / 60 + SETUP_ENCUADERNADO_MIN
+
+
+def min_empacar(cantidad_libros):
+    n = math.ceil(cantidad_libros / LIBROS_POR_TANDA_EMPAQUE)
+    return n * MIN_EMPAQUE_TANDA + SETUP_EMPACAR_SEG / 60
+
 
 MAPEO_LAMINADO_PRODUCTOS_ODOO = {
     'LAMINADO MATE': '__export__.product_template_laminado_mate_gr_32_x_2000_cm',
