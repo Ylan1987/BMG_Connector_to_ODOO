@@ -171,10 +171,32 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
 
     title_to_sol_map = {t['title_id']: t.get('odoo_sale_order_line_id') for t in grupo_trabajos if t.get('title_id')}
     title_to_variant_map = {t['title_id']: t.get('odoo_product_variant_id') for t in grupo_trabajos}
-    
+
     # --- NUEVO: Mapeo de variante a descripción para las líneas de movimiento ---
     variant_to_desc_map = {t['odoo_product_variant_id']: t.get('descripcion_detalle_libro', '') for t in grupo_trabajos}
-    
+
+    # --- FIX 2026-08-17: asegurar procurement_group_id ANTES de crear los
+    # stock.move. Sin esto, sale_id/group_id de los pickings creados aca
+    # quedan vacios para siempre (son campos related+store derivados de
+    # stock.move.group_id, no se pueden "arreglar" escribiendolos directo -
+    # Odoo los vuelve a calcular en False apenas dispara un recompute) y el
+    # pedido queda con la pestaña "Entregas" vacia. En este punto el pedido
+    # todavia esta en draft (action_confirm() se llama recien mas abajo, al
+    # final del run()), asi que Odoo todavia no le creo su
+    # procurement_group_id solo - lo creamos nosotros con la misma forma que
+    # usa Odoo nativo (sale_stock/models/sale_order_line.py,
+    # _prepare_procurement_group_vals) para que action_confirm() lo reutilice
+    # en vez de crear uno nuevo.
+    if not sale_order.procurement_group_id:
+        nuevo_grupo_id = odoo_api.env['procurement.group'].create({
+            'name': so_name,
+            'move_type': sale_order.picking_policy,
+            'sale_id': so_id,
+            'partner_id': sale_order.partner_shipping_id.id,
+        })
+        sale_order.write({'procurement_group_id': nuevo_grupo_id.id})
+    group_id_final = sale_order.procurement_group_id.id
+
     datos_envio = json.loads(datos_envio_json)
     pickings_data = []
     
@@ -211,8 +233,9 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
                     'product_uom': odoo_api.env.ref(mapeos.ODOO_UOM_PRODUCT_UOM_UNIT_XMLID).id,
                     'location_id': location_id, 
                     'location_dest_id': odoo_api.env.ref(mapeos.ODOO_LOCATION_CUSTOMERS_XMLID).id,
-                    'partner_id': contacto_envio_id, 
+                    'partner_id': contacto_envio_id,
                     'sale_line_id': sale_line_id,
+                    'group_id': group_id_final,
                 }))
         
         if not move_lines: continue
