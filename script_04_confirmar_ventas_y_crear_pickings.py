@@ -194,7 +194,7 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
             'sale_id': so_id,
             'partner_id': sale_order.partner_shipping_id.id,
         })
-        sale_order.write({'procurement_group_id': nuevo_grupo_id.id})
+        sale_order.write({'procurement_group_id': nuevo_grupo_id})
     group_id_final = sale_order.procurement_group_id.id
 
     datos_envio = json.loads(datos_envio_json)
