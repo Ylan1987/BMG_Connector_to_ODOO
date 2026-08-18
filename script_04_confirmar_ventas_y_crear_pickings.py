@@ -172,8 +172,17 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
     title_to_sol_map = {t['title_id']: t.get('odoo_sale_order_line_id') for t in grupo_trabajos if t.get('title_id')}
     title_to_variant_map = {t['title_id']: t.get('odoo_product_variant_id') for t in grupo_trabajos}
 
-    # --- NUEVO: Mapeo de variante a descripción para las líneas de movimiento ---
-    variant_to_desc_map = {t['odoo_product_variant_id']: t.get('descripcion_detalle_libro', '') for t in grupo_trabajos}
+    # --- NUEVO: Mapeo de titulo a descripción para las líneas de movimiento ---
+    # FIX 2026-08-18: antes esto estaba indexado por odoo_product_variant_id
+    # (el formato fisico de impresion: tamaño/papel/laminado). Cuando 2+
+    # libros de un mismo pedido comparten exactamente el mismo formato
+    # fisico (variante), el dict se pisaba y todas las lineas de esa
+    # variante terminaban con la descripcion del ULTIMO libro procesado,
+    # sin importar cual les correspondia (confirmado en WH/OUT/22038,
+    # P81969: 4 titulos distintos compartian variante y las 4 lineas
+    # mostraban el mismo titulo equivocado en el picking impreso). title_id
+    # es unico por libro, no por formato - no tiene ese problema.
+    title_to_desc_map = {t['title_id']: t.get('descripcion_detalle_libro', '') for t in grupo_trabajos if t.get('title_id')}
 
     # --- FIX 2026-08-17: asegurar procurement_group_id ANTES de crear los
     # stock.move. Sin esto, sale_id/group_id de los pickings creados aca
@@ -220,7 +229,7 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
 
             if copies > 0 and variant_id and sale_line_id:
                 # --- NUEVO: Descripción para la línea de movimiento ---
-                descripcion_completa = variant_to_desc_map.get(variant_id, '')
+                descripcion_completa = title_to_desc_map.get(title_id_json, '')
                 lineas = descripcion_completa.strip().split('\n')
                 descripcion_resumida = "\n".join(lineas[:2]).strip()
                 # --- FIN NUEVO ---
