@@ -467,9 +467,16 @@ def run():
             cartulina_product_id = cartulina_product_ids[0]
             tapa_components.append({'product_id': cartulina_product_id, 'quantity': 1})
             
+            # FIX 2026-08-21: "Guillotinar Tapa" se saco de aca (y "Guillotinar
+            # Interior" del interior, mas abajo) - el corte de tapa e interior
+            # por separado ANTES de Juntar nunca reflejo la realidad del taller
+            # (ahi se juntan y se cortan una sola vez). Ahora la tapa solo
+            # imprime (+lamina si corresponde) y el corte combinado pasa a
+            # vivir en final_operations, despues de "Juntar Tapas e Interior".
+            # Pedidos ya abiertos con la estructura vieja (creados antes de
+            # este fix) NO se tocan - siguen su curso tal cual estan.
             tapa_operations = [
                 {'name': 'Imprimir Tapa', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_7200'], 'bmg_op_key': 'IMPRIMIR_TAPA'},
-                {'name': 'Guillotinar Tapa', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['GUILLOTINA'], 'bmg_op_key': 'GUILLOTINAR_TAPA'},
             ]
             
             laminado_api = trabajo.get('laminate')
@@ -492,8 +499,15 @@ def run():
                     _logger.warning(f"    ⚠️ Advertencia: No se encontró el ID externo para el componente de laminado '{nombre_laminado}'")
 
             def agregar_operacion_barniz():
+                # FIX 2026-08-21: antes era insert(-1, ...) porque
+                # 'Guillotinar Tapa' era siempre el ultimo elemento de la
+                # lista (asi quedaba antes del guillotinado). Ahora que
+                # 'Guillotinar Tapa' ya no existe en tapa_operations,
+                # Barnizar tiene que ir directo al final (append) - insert(-1)
+                # en una lista de 1-2 elementos lo insertaria ANTES de
+                # Imprimir/Laminar, invirtiendo el orden real del proceso.
                 if not any(op['name'] == 'Barnizar' for op in tapa_operations):
-                    tapa_operations.insert(-1, {'name': 'Barnizar', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_7200'], 'bmg_op_key': None})
+                    tapa_operations.append({'name': 'Barnizar', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_7200'], 'bmg_op_key': None})
 
             if laminado_nombre == 'LAMINADO UV':
                 _logger.info("    -> Lógica LAMINADO UV: Componente 'Laminado Mate' + Operación 'Barnizar'")
@@ -510,8 +524,6 @@ def run():
                 dur_min = None
                 if op_tapa['name'] == 'Imprimir Tapa':
                     dur_min = mapeos.min_imprimir_tapa(cantidad_libros, tamaño_papel_tapa)
-                elif op_tapa['name'] == 'Guillotinar Tapa':
-                    dur_min = mapeos.min_guillotinar_tapa(cantidad_libros)
                 elif op_tapa['name'] == 'Laminar':
                     dur_min = mapeos.min_laminar(cantidad_libros, tamaño_papel_tapa)
                 elif op_tapa['name'] == 'Barnizar':
@@ -583,19 +595,18 @@ def run():
                 hojas_necesarias = math.ceil(bw_pages / pages_per_sheet)
                 interior_components = [{'product_id': papel_cortado_product_id[0], 'quantity': hojas_necesarias}]
 
+                # FIX 2026-08-21: 'Guillotinar Interior' se saco de aca - ver
+                # comentario en tapa_operations mas arriba. El corte combinado
+                # (tapa+interior juntos) ahora vive en final_operations.
                 interior_operations = [
                     {'name': 'Imprimir Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_8310'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_BYN'},
-                    {'name': 'Guillotinar Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['GUILLOTINA'], 'bmg_op_key': 'GUILLOTINAR_INTERIOR'},
                 ]
                 dur_imprimir = mapeos.min_imprimir_interior(hojas_necesarias, papel_folder, workcenter='8310')
-                dur_guillotinar = mapeos.min_guillotinar_interior_inicial(cantidad_libros)
                 if dur_imprimir is not None:
                     duraciones_calculadas['Imprimir Interior'] = dur_imprimir
                     _logger.info(f"    -> Duración calculada 'Imprimir Interior' (ByN, {hojas_necesarias} hojas, papel {papel_folder}, 8310): {dur_imprimir:.1f} min")
                 else:
                     _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior' - papel '{papel_folder}' sin rate en mapeos.RATE_8310_PAG_MIN. Odoo usará su valor por defecto.")
-                duraciones_calculadas['Guillotinar Interior'] = dur_guillotinar
-                _logger.info(f"    -> Duración calculada 'Guillotinar Interior' ({cantidad_libros} ej.): {dur_guillotinar:.1f} min")
 
                 crear_ldm(odoo_api, interior_final_product_id, interior_components, interior_operations, trabajo)
 
@@ -724,19 +735,17 @@ def run():
                     {'product_id': color_interior_component_id, 'quantity': 1}
                 ]
 
+                # FIX 2026-08-21: 'Guillotinar Interior' se saco de aca -
+                # mismo motivo que en la rama ByN mas arriba.
                 final_interior_operations = [
                     {'name': 'Imprimir Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_8310'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_BYN'},
-                    {'name': 'Guillotinar Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['GUILLOTINA'], 'bmg_op_key': 'GUILLOTINAR_INTERIOR'},
                 ]
                 dur_imprimir = mapeos.min_imprimir_interior(hojas_byn_necesarias, papel_folder, workcenter='8310')
-                dur_guillotinar = mapeos.min_guillotinar_interior_inicial(cantidad_libros)
                 if dur_imprimir is not None:
                     duraciones_calculadas['Imprimir Interior'] = dur_imprimir
                     _logger.info(f"    -> Duración calculada 'Imprimir Interior' (mixto ByN, {hojas_byn_necesarias} hojas, papel {papel_folder}, 8310): {dur_imprimir:.1f} min")
                 else:
                     _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior' - papel '{papel_folder}' sin rate en mapeos.RATE_8310_PAG_MIN. Odoo usará su valor por defecto.")
-                duraciones_calculadas['Guillotinar Interior'] = dur_guillotinar
-                _logger.info(f"    -> Duración calculada 'Guillotinar Interior' (mixto, {cantidad_libros} ej.): {dur_guillotinar:.1f} min")
 
                 crear_ldm(odoo_api, interior_final_product_id, final_interior_components, final_interior_operations, trabajo)
             
@@ -749,18 +758,27 @@ def run():
                 {'product_id': tapa_product_id, 'quantity': 1},
                 {'product_id': interior_final_product_id, 'quantity': 1},
             ]
+            # FIX 2026-08-21: se agrega 'Guillotinar Tapa e Interior' aca,
+            # entre Juntar y Encuadernar - reemplaza a los 2 cortes previos
+            # por separado que se sacaron de tapa_operations/interior_operations
+            # mas arriba (el taller siempre corto tapa+interior juntos DESPUES
+            # de juntarlos, nunca por separado antes - esto solo corrige el
+            # modelado para que coincida con la realidad). 'Guillotinado
+            # Final' (post-encuadernado) no cambia.
             final_operations = [
                 {'name': 'Juntar Tapas e Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['MESA_MULTITAREA'], 'bmg_op_key': 'JUNTAR_TAPAS_INTERIOR'},
+                {'name': 'Guillotinar Tapa e Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['GUILLOTINA'], 'bmg_op_key': 'GUILLOTINAR_TAPA_INTERIOR'},
                 {'name': 'Encuadernar', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['ENCUADERNADORA_HORIZON'], 'bmg_op_key': 'ENCUADERNAR'},
                 {'name': 'Guillotinado Final', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['GUILLOTINA'], 'bmg_op_key': 'GUILLOTINADO_FINAL'},
                 {'name': 'Empacar', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['EMPAQUETADORA'], 'bmg_op_key': 'EMPACAR'},
             ]
             total_pages_libro = bw_pages + color_pages
             duraciones_calculadas['Juntar Tapas e Interior'] = mapeos.min_juntar_tapas_interior()
+            duraciones_calculadas['Guillotinar Tapa e Interior'] = mapeos.min_guillotinar_tapa_interior_combinado(cantidad_libros)
             duraciones_calculadas['Encuadernar'] = mapeos.min_encuadernar(cantidad_libros)
             duraciones_calculadas['Guillotinado Final'] = mapeos.min_guillotinado_final(cantidad_libros, total_pages_libro)
             duraciones_calculadas['Empacar'] = mapeos.min_empacar(cantidad_libros)
-            for op_name_libro in ('Juntar Tapas e Interior', 'Encuadernar', 'Guillotinado Final', 'Empacar'):
+            for op_name_libro in ('Juntar Tapas e Interior', 'Guillotinar Tapa e Interior', 'Encuadernar', 'Guillotinado Final', 'Empacar'):
                 _logger.info(f"    -> Duración calculada '{op_name_libro}' (libro, {cantidad_libros} ej., {total_pages_libro} páginas totales): {duraciones_calculadas[op_name_libro]:.1f} min")
 
             crear_ldm(odoo_api, libro_product_id, final_components, final_operations, trabajo)

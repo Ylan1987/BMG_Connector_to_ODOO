@@ -233,6 +233,15 @@ def min_guillotinar_interior_inicial(cantidad_libros):
     return cantidad_libros * MIN_CORTE_INICIAL_LIBRO + SETUP_GUILLOTINA_MIN
 
 
+def min_guillotinar_tapa_interior_combinado(cantidad):
+    # FIX 2026-08-21: formula placeholder pedida explicitamente por el
+    # usuario = suma literal de lo que antes eran 2 cortes por separado
+    # (incluye 2 veces SETUP_GUILLOTINA_MIN, uno por cada formula original).
+    # Se ajusta despues con datos reales de produccion una vez que el corte
+    # combinado este funcionando en el taller.
+    return min_guillotinar_tapa(cantidad) + min_guillotinar_interior_inicial(cantidad)
+
+
 def min_guillotinado_final(cantidad_libros, total_pages):
     if total_pages < 200:
         grupo = 3

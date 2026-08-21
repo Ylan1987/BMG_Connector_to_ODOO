@@ -168,7 +168,10 @@ MAPEO_ESTADOS_BMG = {
     },
     
     # ------------------------------------------------------------------------
-    # GUILLOTINADO DE TAPA
+    # GUILLOTINADO DE TAPA (solo pedidos viejos, estructura pre-2026-08-21 -
+    # las OF nuevas ya no tienen esta operacion, ver GUILLOTINAR_TAPA_INTERIOR
+    # mas abajo. Se deja esta entrada para que las OF ya abiertas con la
+    # estructura vieja sigan funcionando sin cambios hasta cerrarse.)
     # ------------------------------------------------------------------------
     'GUILLOTINAR_TAPA': {
         'nombre_operacion_odoo': 'Guillotinar Tapa',
@@ -180,9 +183,10 @@ MAPEO_ESTADOS_BMG = {
             'eDist': None # No se notifica en eDist
         }
     },
-    
+
     # ------------------------------------------------------------------------
-    # GUILLOTINADO DE INTERIOR (B/N y COLOR juntos)
+    # GUILLOTINADO DE INTERIOR (B/N y COLOR juntos) - solo pedidos viejos,
+    # ver mismo comentario que arriba.
     # ------------------------------------------------------------------------
     'GUILLOTINAR_INTERIOR': {
         'nombre_operacion_odoo': 'Guillotinar Interior',
@@ -192,6 +196,25 @@ MAPEO_ESTADOS_BMG = {
         'estado_completado': {
             'POD': 51,   # Interior Guillotinado (POD)
             'eDist': 104 # Primer Corte (eDist)
+        }
+    },
+
+    # ------------------------------------------------------------------------
+    # GUILLOTINADO COMBINADO DE TAPA E INTERIOR (FIX 2026-08-21) - pedidos
+    # nuevos: reemplaza a GUILLOTINAR_TAPA + GUILLOTINAR_INTERIOR por un solo
+    # corte, hecho despues de Juntar. A pedido del usuario, dispara SOLO el
+    # estado "Interior Guillotinado" hacia BMG (el de tapa no le importa a
+    # BMG) - por eso usa los mismos estados que GUILLOTINAR_INTERIOR de
+    # arriba.
+    # ------------------------------------------------------------------------
+    'GUILLOTINAR_TAPA_INTERIOR': {
+        'nombre_operacion_odoo': 'Guillotinar Tapa e Interior',
+        'descripcion': 'Guillotinado combinado de tapa e interior ya juntados',
+        'estado_disponible': None,
+        'estado_en_progreso': None,
+        'estado_completado': {
+            'POD': 51,   # Interior Guillotinado (POD) - mismo estado que GUILLOTINAR_INTERIOR
+            'eDist': 104 # Primer Corte (eDist) - mismo estado que GUILLOTINAR_INTERIOR
         }
     },
     
