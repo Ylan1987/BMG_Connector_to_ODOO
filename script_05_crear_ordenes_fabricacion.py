@@ -601,10 +601,17 @@ def run():
                 interior_operations = [
                     {'name': 'Imprimir Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_8310'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_BYN'},
                 ]
-                dur_imprimir = mapeos.min_imprimir_interior(hojas_necesarias, papel_folder, workcenter='8310')
+                # BUG encontrado y corregido 2026-09-02: min_imprimir_interior
+                # recibia 'hojas_necesarias' (hojas de UN solo ejemplar) sin
+                # multiplicar por la cantidad de copias del pedido - la
+                # duracion calculada era la misma para 1 copia o 1000. Se
+                # multiplica aca (NO en interior_components, que si consume
+                # material por ejemplar real de forma separada - eso queda
+                # aparte, sin tocar, ver [[project_bmg_..._consumo_papel]]).
+                dur_imprimir = mapeos.min_imprimir_interior(hojas_necesarias * cantidad_libros, papel_folder, workcenter='8310')
                 if dur_imprimir is not None:
                     duraciones_calculadas['Imprimir Interior'] = dur_imprimir
-                    _logger.info(f"    -> Duración calculada 'Imprimir Interior' (ByN, {hojas_necesarias} hojas, papel {papel_folder}, 8310): {dur_imprimir:.1f} min")
+                    _logger.info(f"    -> Duración calculada 'Imprimir Interior' (ByN, {hojas_necesarias} hojas x {cantidad_libros} ej., papel {papel_folder}, 8310): {dur_imprimir:.1f} min")
                 else:
                     _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior' - papel '{papel_folder}' sin rate en mapeos.RATE_8310_PAG_MIN. Odoo usará su valor por defecto.")
 
@@ -645,10 +652,11 @@ def run():
                 color_components = [{'product_id': papel_cortado_color_product_id[0], 'quantity': hojas_color_necesarias}]
                 
                 color_operations = [{'name': 'Imprimir Interior Color', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_7200'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_COLOR'}]
-                dur_color = mapeos.min_imprimir_interior(hojas_color_necesarias, papel_folder, workcenter='7200')
+                # BUG corregido 2026-09-02: faltaba multiplicar por cantidad_libros (ver comentario en la rama ByN).
+                dur_color = mapeos.min_imprimir_interior(hojas_color_necesarias * cantidad_libros, papel_folder, workcenter='7200')
                 if dur_color is not None:
                     duraciones_calculadas['Imprimir Interior Color'] = dur_color
-                    _logger.info(f"    -> Duración calculada 'Imprimir Interior Color' (100% color, {hojas_color_necesarias} hojas, papel {papel_folder}): {dur_color:.1f} min")
+                    _logger.info(f"    -> Duración calculada 'Imprimir Interior Color' (100% color, {hojas_color_necesarias} hojas x {cantidad_libros} ej., papel {papel_folder}): {dur_color:.1f} min")
                 else:
                     _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior Color' - papel '{papel_folder}' sin rate en mapeos.RATE_7200_INTERIOR_PAG_MIN. Odoo usará su valor por defecto.")
 
@@ -688,10 +696,11 @@ def run():
                 hojas_color_necesarias = math.ceil(color_pages / pages_per_sheet)
                 color_components = [{'product_id': papel_cortado_color_product_id[0], 'quantity': hojas_color_necesarias}]
                 color_operations = [{'name': 'Imprimir Interior Color', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_7200'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_COLOR'}]
-                dur_color = mapeos.min_imprimir_interior(hojas_color_necesarias, papel_folder, workcenter='7200')
+                # BUG corregido 2026-09-02: faltaba multiplicar por cantidad_libros (ver comentario en la rama ByN pura, mas arriba).
+                dur_color = mapeos.min_imprimir_interior(hojas_color_necesarias * cantidad_libros, papel_folder, workcenter='7200')
                 if dur_color is not None:
                     duraciones_calculadas['Imprimir Interior Color'] = dur_color
-                    _logger.info(f"    -> Duración calculada 'Imprimir Interior Color' (mixto, {hojas_color_necesarias} hojas, papel {papel_folder}): {dur_color:.1f} min")
+                    _logger.info(f"    -> Duración calculada 'Imprimir Interior Color' (mixto, {hojas_color_necesarias} hojas x {cantidad_libros} ej., papel {papel_folder}): {dur_color:.1f} min")
                 else:
                     _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior Color' - papel '{papel_folder}' sin rate en mapeos.RATE_7200_INTERIOR_PAG_MIN. Odoo usará su valor por defecto.")
 
@@ -740,10 +749,11 @@ def run():
                 final_interior_operations = [
                     {'name': 'Imprimir Interior', 'workcenter_ext_id': mapeos.MAPEO_CENTROS_TRABAJO['IMPRESORA_8310'], 'bmg_op_key': 'IMPRIMIR_INTERIOR_BYN'},
                 ]
-                dur_imprimir = mapeos.min_imprimir_interior(hojas_byn_necesarias, papel_folder, workcenter='8310')
+                # BUG corregido 2026-09-02: faltaba multiplicar por cantidad_libros (ver comentario en la rama ByN pura, mas arriba).
+                dur_imprimir = mapeos.min_imprimir_interior(hojas_byn_necesarias * cantidad_libros, papel_folder, workcenter='8310')
                 if dur_imprimir is not None:
                     duraciones_calculadas['Imprimir Interior'] = dur_imprimir
-                    _logger.info(f"    -> Duración calculada 'Imprimir Interior' (mixto ByN, {hojas_byn_necesarias} hojas, papel {papel_folder}, 8310): {dur_imprimir:.1f} min")
+                    _logger.info(f"    -> Duración calculada 'Imprimir Interior' (mixto ByN, {hojas_byn_necesarias} hojas x {cantidad_libros} ej., papel {papel_folder}, 8310): {dur_imprimir:.1f} min")
                 else:
                     _logger.warning(f"    ⚠️ No se pudo calcular duración de 'Imprimir Interior' - papel '{papel_folder}' sin rate en mapeos.RATE_8310_PAG_MIN. Odoo usará su valor por defecto.")
 
