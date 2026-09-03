@@ -171,10 +171,11 @@ MAPEO_CENTROS_TRABAJO = {
 # hardcodea un numero de tiempo directamente.
 # ============================================================================
 
-# paginas/min por formato de papel (RATE_8420 usa los mismos valores que
-# RATE_8310 en 23x32, pero es mas rapida en 25x35 - confirmado por separado)
-RATE_8310_PAG_MIN = {'23x32': 75, '25x35': 65}
-RATE_8420_PAG_MIN = {'23x32': 75, '25x35': 90}
+# paginas/min por formato de papel. Corregido 2026-09-02 por el usuario -
+# la 8420 es mas rapida que la 8310 en AMBOS formatos (antes 23x32 tenia el
+# mismo rate para las 2, dato viejo incorrecto).
+RATE_8310_PAG_MIN = {'23x32': 85, '25x35': 65}
+RATE_8420_PAG_MIN = {'23x32': 95, '25x35': 75}
 RATE_7200_INTERIOR_PAG_MIN = {'23x32': 55, '25x35': 65}
 RATE_7200_TAPA_UNID_MIN = {'33x36': 40, '33x48.7': 30, '33x70': 20}
 
