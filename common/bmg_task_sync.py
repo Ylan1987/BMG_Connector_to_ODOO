@@ -256,14 +256,94 @@ def aplicar_accion_por_estado_bmg(odoo_api, new_status_id, code, line_number,
     # BMG Status: ANULADO (IDs 38 para POD, 234 para eDist)
     elif new_status_id in (bmg_estados_mapeo.get_bmg_status_id("ANULADO"), 234):
         if odoo_sale_order_id:
+            so = odoo_api.env['sale.order'].browse(odoo_sale_order_id)
+
+            # BUG encontrado el 2026-09-17 con datos reales (P83405/PED00681708):
+            # sale.order.action_cancel() nativo, cuando el pedido NO esta en
+            # borrador (_show_cancel_wizard() -> True para cualquier state !=
+            # 'draft'), no cancela nada - solo devuelve el dict de una ventana
+            # emergente para que un humano la complete a mano. Sin
+            # disable_cancel_warning en el contexto, la llamada no tira
+            # excepcion y este codigo logueaba "cancelado" igual, sin haber
+            # cancelado un solo pedido de verdad (confirmado leyendo
+            # sale/models/sale_order.py:1010 en el servidor).
             try:
-                so = odoo_api.env['sale.order'].browse(odoo_sale_order_id)
                 if so and so.state not in ('done', 'cancel'):
-                    so.action_cancel()
-                    _logger.info(f"✅ Pedido de Venta {so.name} (ID: {odoo_sale_order_id}) cancelado en Odoo.")
+                    so.with_context(disable_cancel_warning=True).action_cancel()
+                    # so.state (odoorpc) queda con el valor cacheado de antes
+                    # de la llamada - releer directo para confirmar que
+                    # realmente quedo en 'cancel', no confiar en la ausencia
+                    # de excepcion (ver bug documentado arriba).
+                    estado_post = odoo_api.env['sale.order'].read([odoo_sale_order_id], ['state'])[0]['state']
+                    if estado_post == 'cancel':
+                        _logger.info(f"✅ Pedido de Venta {so.name} (ID: {odoo_sale_order_id}) cancelado en Odoo.")
+                    else:
+                        _logger.error(f"❌ action_cancel() en Pedido de Venta {so.name} (ID: {odoo_sale_order_id}) no dejo el pedido en 'cancel' (quedo en '{estado_post}').")
                 elif so:
                     _logger.info(f"Pedido de Venta {so.name} (ID: {odoo_sale_order_id}) ya estaba en estado '{so.state}'. No se requiere acción.")
             except Exception as e:
                 _logger.error(f"❌ Error al intentar cancelar el Pedido de Venta ID {odoo_sale_order_id} en Odoo: {e}")
+
+            # Cancelar tambien las OF de este pedido (interior/tapa/libro/color -
+            # mismo criterio de busqueda que usa
+            # script_05_crear_ordenes_fabricacion.py para encontrar las OF de
+            # un pedido: origin == nombre corto de la SO). Si alguna OF ya
+            # tiene trabajo real hecho/en curso y Odoo rechaza cancelarla, se
+            # loguea el error puntual y se sigue con el resto - una OF
+            # bloqueada no debe frenar a las demas.
+            try:
+                mrp_production_model = odoo_api.env['mrp.production']
+                of_ids = mrp_production_model.search([
+                    ('origin', '=', so.name),
+                    ('state', 'not in', ('done', 'cancel')),
+                ])
+                for of_id in of_ids:
+                    of_record = mrp_production_model.browse(of_id)
+                    try:
+                        of_record.action_cancel()
+                        _logger.info(f"✅ OF {of_record.name} (ID: {of_id}) cancelada en Odoo (pedido {so.name} anulado).")
+                    except Exception as e:
+                        _logger.error(f"❌ Error al intentar cancelar la OF {of_record.name} (ID: {of_id}): {e}")
+            except Exception as e:
+                _logger.error(f"❌ Error al buscar las OF del Pedido de Venta {so.name} para cancelar: {e}")
+
+            # Borrar la imagen de portada: el adjunto 'tapa-miniatura...' de
+            # cada linea del pedido (asi la guarda taller_bar_code al
+            # generarla), y el campo x_image (+ el de sus workorders) en las
+            # OF - mismo campo/alcance que ya sincroniza
+            # mrp.production.action_resize_and_sync_to_workorders.
+            try:
+                if so.order_line:
+                    attachment_model = odoo_api.env['ir.attachment']
+                    tapa_ids = attachment_model.search([
+                        ('res_model', '=', 'sale.order.line'),
+                        ('res_id', 'in', so.order_line.ids),
+                        ('name', 'ilike', 'tapa-miniatura%'),
+                    ])
+                    if tapa_ids:
+                        attachment_model.browse(tapa_ids).unlink()
+                        _logger.info(f"✅ {len(tapa_ids)} adjunto(s) de portada borrados de las líneas del Pedido de Venta {so.name}.")
+            except Exception as e:
+                _logger.error(f"❌ Error al borrar la imagen de portada del Pedido de Venta {so.name}: {e}")
+
+            try:
+                mrp_production_model = odoo_api.env['mrp.production']
+                todas_las_of_ids = mrp_production_model.search([('origin', '=', so.name)])
+                if todas_las_of_ids:
+                    mrp_production_model.browse(todas_las_of_ids).write({'x_image': False})
+                    # BUG encontrado el 2026-09-17 (corrida real contra
+                    # P83405): a diferencia de Odoo nativo, el .mapped() de
+                    # odoorpc sobre un campo relacional no devuelve un
+                    # recordset navegable de workorder_ids, tira
+                    # "'str' object has no attribute 'write'". Se busca la
+                    # mrp.workorder directo por production_id, igual que el
+                    # resto de este archivo hace con otras relaciones.
+                    wo_model = odoo_api.env['mrp.workorder']
+                    wo_ids = wo_model.search([('production_id', 'in', todas_las_of_ids)])
+                    if wo_ids:
+                        wo_model.browse(wo_ids).write({'x_image': False})
+                    _logger.info(f"✅ Imagen de portada limpiada en {len(todas_las_of_ids)} OF y {len(wo_ids)} workorder(s) del Pedido de Venta {so.name}.")
+            except Exception as e:
+                _logger.error(f"❌ Error al borrar la imagen de portada de las OF del Pedido de Venta {so.name}: {e}")
         else:
             _logger.warning(f"Línea {code}-{line_number} anulada en BMG, pero no se encontró Pedido de Venta en Odoo para cancelar.")
