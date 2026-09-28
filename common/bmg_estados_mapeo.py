@@ -332,7 +332,12 @@ LISTA_ESTADOS_FINALES_IDS = [
     BMG_STATUS_NAME_TO_ID.get('FACTURADO'),
     BMG_STATUS_NAME_TO_ID.get('ANULADO'),
     ESTADOS_LOGISTICA_BMG['ENTREGADO']['eDist'],
-    ESTADOS_LOGISTICA_BMG['FACTURADO']['eDist']
+    ESTADOS_LOGISTICA_BMG['FACTURADO']['eDist'],
+    # ANULADO eDist = 234 (ver common/bmg_task_sync.py:256-257, que ya lo usa
+    # correctamente) - faltaba acá, por eso script_03 no descartaba pedidos
+    # eDist ya anulados en BMG antes de crearlos (bug real, P83664/
+    # PED00683832, encontrado 2026-09-25).
+    234,
 ]
 # Limpiar valores None
 LISTA_ESTADOS_FINALES_IDS = [id for id in LISTA_ESTADOS_FINALES_IDS if id is not None]
