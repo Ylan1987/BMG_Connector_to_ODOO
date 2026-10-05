@@ -8,6 +8,7 @@ Script 1: Sincronizador de Pedidos desde BMG a la Base de Datos Local.
 """
 
 import json
+import logging
 import sqlite3
 import requests
 from datetime import datetime, timedelta
@@ -15,6 +16,8 @@ from zeep import Client
 
 # Importar módulos comunes de la V2.0
 from common import mapeos, db_conn
+
+_logger = logging.getLogger(__name__)
 
 def detectar_origen_por_url(title_id):
     """
@@ -37,13 +40,32 @@ def detectar_origen_por_url(title_id):
             continue
     return "ES", "" # Por defecto ES si no se encuentra o hay error
 
+def _precio_a_float(valor):
+    """Convierte un precio de BMG a float, aguantando el separador de miles.
+
+    BMG manda los precios como texto y, a partir de 1000, con coma de miles:
+    "1,295.0000". float() revienta con ValueError, el except de abajo se comia
+    el error y la linea quedaba guardada SIN ninguno de los 12 campos
+    financieros (x_origen_pais vacio, comisiones en cero).
+
+    Medido el 2026-10-05 sobre trabajos.db: de 445 lineas de eDist sin
+    comisiones calculadas, 392 (88%) tenian coma en algun precio. Son todas
+    las de precio > 999.
+    """
+    if valor in (None, ''):
+        return 0.0
+    if isinstance(valor, (int, float)):
+        return float(valor)
+    return float(str(valor).replace(',', '').strip())
+
+
 def calcular_matematica_pura(datos):
     """
     Realiza los cálculos de comisiones basados en el origen y los precios.
     """
-    pvp = float(datos.get('unit_price') or 0)
-    p_canal = float(datos.get('unit_price_channel') or 0)
-    costo_imp = float(datos.get('unit_price_invoice') or 0)
+    pvp = _precio_a_float(datos.get('unit_price'))
+    p_canal = _precio_a_float(datos.get('unit_price_channel'))
+    costo_imp = _precio_a_float(datos.get('unit_price_invoice'))
     
     origen, url = detectar_origen_por_url(datos.get('title_id'))
     es_uy = (origen == "UY")
@@ -178,7 +200,16 @@ def sincronizar_linea_con_db(order_element, line_element):
         resultados_finance = calcular_matematica_pura(datos)
         datos.update(resultados_finance)
     except Exception as e_finance:
+        # Antes esto solo imprimia y seguia: la linea quedaba guardada sin los 12
+        # campos financieros y nadie se enteraba (asi pasaron 392 lineas). Se
+        # loguea como ERROR para que quede en sistema_bmg.log y se pueda buscar.
         print(f"    -> ⚠️ Error en cálculo financiero: {e_finance}")
+        _logger.error(
+            f"Cálculo financiero FALLIDO para {datos.get('order_code')}-"
+            f"{datos.get('line_number')}: {e_finance}. La línea se guarda SIN "
+            f"comisiones (unit_price={datos.get('unit_price')!r}, "
+            f"unit_price_channel={datos.get('unit_price_channel')!r}, "
+            f"unit_price_invoice={datos.get('unit_price_invoice')!r})")
     # -----------------------------------------------
 
     datos['estado_odoo'] = estado_odoo_inicial
