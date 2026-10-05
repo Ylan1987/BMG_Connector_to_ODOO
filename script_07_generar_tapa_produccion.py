@@ -3,6 +3,7 @@ import re
 import sqlite3
 import fitz
 import logging
+import traceback
 from common import mapeos, db_conn, odoo_conn
 
 # Configurar logging
@@ -29,7 +30,19 @@ def obtener_cajas_normalizadas_pypdf(ruta_archivo):
                 'media': fitz.Rect(float(media[0])+tx, float(media[1])+ty, float(media[2])+tx, float(media[3])+ty),
                 'trim': fitz.Rect(float(trim[0])+tx, float(trim[1])+ty, float(trim[2])+tx, float(trim[3])+ty)
             }
-    except: return None
+    except Exception as e:
+        # LOGGING DIAGNOSTICO agregado 2026-09-22 (PED00681720/TitleID 499573,
+        # error real todavia sin explicar - ver traceback completo abajo, no
+        # se vuelve a asumir la causa sin verlo primero): antes esto tragaba
+        # cualquier excepcion en silencio (bare except, sin loguear nada) -
+        # si la falla real estuviera ACA (no donde se penso antes) nunca
+        # habria quedado registro.
+        _logger.error(
+            f"      [DIAG] obtener_cajas_normalizadas_pypdf() fallo en {ruta_archivo} "
+            f"(pypdf {getattr(pypdf, '__version__', '?')}): {type(e).__name__}: {e}\n"
+            f"{traceback.format_exc()}"
+        )
+        return None
 
 def encontrar_ruta_trabajo_dinamicamente(base_path, publisher_ids_limpios, title_id_limpio):
     pub_ids = []
@@ -199,7 +212,25 @@ def procesar_tapa(trabajo_actual):
             # intermedio ya con el lienzo correcto, y fitz recien entra despues,
             # solo para insertar texto y codigo de barras - nunca toca boxes.
             import pypdf
+            import pypdf.filters
             from pypdf.generic import RectangleObject
+            # FIX 2026-09-22 (PED00681720/TitleID 499573, confirmado con traceback
+            # real del contenedor - pypdf.errors.LimitReachedError en
+            # pypdf/generic/_data_structures.py, read_from_stream()): pypdf >=6.8.0
+            # agrego un techo (CVE-2026-31826, proteccion contra streams con /Length
+            # declarado gigante) - pypdf.filters.MAX_DECLARED_STREAM_LENGTH, default
+            # 75_000_000 bytes. Es por STREAM individual, no por archivo entero -
+            # una tapa con una sola imagen de fondo en alta resolucion (este caso:
+            # 84.789.619 bytes declarados) lo supera aunque el archivo total no sea
+            # el mas grande que se procesa. Verificado con la MISMA version real
+            # (6.14.2, instalada en un venv aislado) y el MISMO archivo real: sin
+            # este monkeypatch falla identico a produccion, con el patch procesa
+            # bien y el resultado despues abre correcto con fitz. Es una constante
+            # de modulo (pypdf.filters.MAX_DECLARED_STREAM_LENGTH), no una opcion de
+            # PdfReader/PdfWriter - se sube ANTES de instanciar el reader, cada vez
+            # (no una sola vez a nivel de import) porque el resto del script no
+            # necesita este limite mas alto en ningun otro lado.
+            pypdf.filters.MAX_DECLARED_STREAM_LENGTH = 200_000_000
             EPS = 0.5
             crop = fitz.Rect(union.x0 + EPS, union.y0 + EPS, union.x1 - EPS, union.y1 - EPS)
             reader = pypdf.PdfReader(ruta_orig)
@@ -262,7 +293,11 @@ def procesar_tapa(trabajo_actual):
         if (fw<=320 and fh<=350) or (fh<=320 and fw<=350): ps = "33x36"
         elif (fw<=320 and fh<=470) or (fh<=320 and fw<=470): ps = "33x48.7"
         elif (fw<=320 and fh<=690) or (fh<=320 and fw<=690): ps = "33x70"
-        else: 
+        else:
+            _logger.error(
+                f"      [DIAG] TitleID {trabajo_actual.get('title_id')}: tamaño final "
+                f"fw={fw:.1f}mm fh={fh:.1f}mm no entra en ningun formato conocido (33x36/33x48.7/33x70)."
+            )
             doc.close()
             return None
 
@@ -274,6 +309,22 @@ def procesar_tapa(trabajo_actual):
         doc.close()
         return ruta_f, ps
     except Exception as e:
+        # LOGGING DIAGNOSTICO agregado 2026-09-22 (mismo pedido/TitleID de
+        # arriba): antes solo se logueaba str(e) en una linea (perdia el
+        # tipo de excepcion, la linea exacta donde revento, y la version
+        # real de pypdf/fitz corriendo en el contenedor - sin eso no se
+        # puede confirmar ninguna hipotesis, solo especular). No cambiar de
+        # nuevo a un print de una sola linea.
+        try:
+            import pypdf as _pypdf_diag
+            _pypdf_ver = getattr(_pypdf_diag, '__version__', '?')
+        except Exception:
+            _pypdf_ver = '?'
+        _logger.error(
+            f"      [DIAG] ERROR procesando tapa {oc}-{ln} (TitleID {tid}) "
+            f"pypdf={_pypdf_ver} fitz={fitz.__doc__!r}: {type(e).__name__}: {e}\n"
+            f"{traceback.format_exc()}"
+        )
         print(f"      ERROR procesando tapa: {e}")
         if doc: doc.close()
         return None
