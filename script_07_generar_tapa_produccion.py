@@ -4,7 +4,7 @@ import sqlite3
 import fitz
 import logging
 import traceback
-from common import mapeos, db_conn, odoo_conn
+from common import mapeos, db_conn, odoo_conn, comisiones_edist
 
 # Configurar logging
 _logger = logging.getLogger(__name__)
@@ -373,6 +373,10 @@ def run():
                 conn = db_conn.conectar_db(); cursor = conn.cursor()
                 cursor.execute("UPDATE trabajos SET ruta_trabajo = ? WHERE order_code = ? AND line_number = ?", (rt, t['order_code'], t['line_number']))
                 conn.commit(); conn.close()
+                t['ruta_trabajo'] = rt
+                # Recien ACA se sabe el pais del editor, asi que es el momento de
+                # recalcular las comisiones de eDist. Ver comisiones_edist.py.
+                comisiones_edist.recalcular_si_corresponde(t, rt, odoo_api)
 
         if rt:
             r_orig, error_msg = encontrar_archivo_mas_reciente(rt, tid, 'TAPA', t.get('order_type', ''))
