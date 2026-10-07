@@ -204,7 +204,34 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
             'partner_id': sale_order.partner_shipping_id.id,
         })
         sale_order.write({'procurement_group_id': nuevo_grupo_id})
-    group_id_final = sale_order.procurement_group_id.id
+
+    # --- FIX 2026-10-07: las entregas al cliente van en un grupo PROPIO
+    # "<pedido> Entregas" (con sale_id = el pedido), no en el grupo del
+    # pedido. Dos motivos, verificados en P83777 / P83569:
+    #  1. El grupo del pedido (procurement_group_id) es el de las OF: una
+    #     entrega con ese grupo aparece en "Traslados" de cada OF, y
+    #     bmg_barcode_interface (controllers/main.py, ~l.163-186) valida
+    #     automaticamente TODO traslado no terminado del grupo de la OF -
+    #     o sea despacharia la entrega al cliente al escanear en taller.
+    #  2. El fix del 2026-08-17 nunca funciono: releia
+    #     sale_order.procurement_group_id del registro odoorpc ya cargado
+    #     (cache de antes del write) y daba False, asi que los moves
+    #     nacian sin grupo y las entregas se "soltaban" del pedido al
+    #     validarse (sale_id es related+store de group_id.sale_id).
+    # El grupo de entregas se identifica por nombre exacto + sale_id, asi
+    # que nunca se confunde con el de las OF (script_05 busca name == so_name).
+    nombre_grupo_entregas = f"{so_name} Entregas"
+    grupos_entregas = odoo_api.env['procurement.group'].search(
+        [('name', '=', nombre_grupo_entregas), ('sale_id', '=', so_id)], limit=1)
+    if grupos_entregas:
+        group_id_final = grupos_entregas[0]
+    else:
+        group_id_final = odoo_api.env['procurement.group'].create({
+            'name': nombre_grupo_entregas,
+            'move_type': sale_order.picking_policy,
+            'sale_id': so_id,
+            'partner_id': sale_order.partner_shipping_id.id,
+        })
 
     datos_envio = json.loads(datos_envio_json)
     pickings_data = []
@@ -293,8 +320,7 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
             'picking_type_id': picking_type_id_final, 'partner_id': contacto_envio_id,
             'origin': so_name, 
             'note': nota_picking,
-            'move_ids_without_package': move_lines, 
-            'sale_id': so_id,
+            'move_ids_without_package': move_lines,
             'scheduled_date': fecha_con_hora, 
             'date_deadline': fecha_con_hora,
             'shipping_weight': peso_total_kg,
@@ -305,9 +331,9 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
         try:
             new_picking_id = picking_model.create(picking_vals)
             
-            # Se escribe el sale_id y el flag BMG en un solo llamado para asegurar la atomicidad
+            # sale_id ya no se escribe a mano: sale solo del grupo de entregas
+            # de los moves (ver FIX 2026-10-07 arriba).
             picking_model.write([new_picking_id], {
-                'sale_id': so_id,
                 'x_is_bmg_picking': True
             })
 
