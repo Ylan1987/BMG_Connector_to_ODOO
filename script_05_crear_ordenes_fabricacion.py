@@ -23,7 +23,7 @@ import base64 # Importar base64 para codificar imágenes
 import io # Importar módulo io para manejar streams de bytes en memoria
 
 # Importar módulos comunes de la V2.0
-from common import db_conn, odoo_conn, mapeos
+from common import db_conn, odoo_conn, mapeos, fechas_entrega
 from common.notificador import enviar_email
 from common.bmg_estados_mapeo import MAPEO_ESTADOS_BMG
 
@@ -276,6 +276,55 @@ def crear_ldm(odoo, product_id, components, operations, trabajo):
     
     MrpBom.create(bom_vals)
     _logger.info(f"    -> ✅ Nueva LdM creada.")
+
+
+def actualizar_fecha_entrega_pod(odoo_api, trabajo):
+    """Regla 2026-10-13 (ver common/fechas_entrega.py): cuando un libro POD entra a
+    produccion (se le crea la OF, despues de la validacion si la tuvo) se calcula
+    su fecha de entrega y se reescribe la de sus entregas abiertas y la del pedido.
+
+    Si el pedido tiene varios libros, cada entrega queda con la fecha MAS LEJANA
+    entre los libros que ya entraron a produccion (no sale hasta tener todo).
+    Los eDist no se tocan: su fecha la fija script_04 al crear el pedido.
+    """
+    if mapeos.BMG_ORDER_TYPE_EDIST_GENERIC in (trabajo.get('order_type') or ''):
+        return
+    order_code, line_number = trabajo['order_code'], trabajo['line_number']
+    fecha = fechas_entrega.fecha_entrega_pod(
+        fechas_entrega.ahora_uy(), trabajo.get('quantity_requested'), trabajo.get('delivery_date'))
+    fecha_str = fecha.strftime('%Y-%m-%d')
+
+    conn = db_conn.conectar_db(); cur = conn.cursor()
+    cur.execute("UPDATE trabajos SET fecha_entrega_calculada = ? WHERE order_code = ? AND line_number = ?",
+                (fecha_str, order_code, line_number))
+    conn.commit()
+    cur.execute("SELECT odoo_sale_order_line_id, fecha_entrega_calculada FROM trabajos "
+                "WHERE order_code = ? AND fecha_entrega_calculada IS NOT NULL", (order_code,))
+    fecha_por_linea = {r[0]: r[1] for r in cur.fetchall() if r[0]}
+    conn.close()
+    _logger.info(f"    -> 📅 Fecha de entrega {order_code}-{line_number}: {fecha_str} "
+                 f"({trabajo.get('quantity_requested')} ej., fecha BMG {trabajo.get('delivery_date') or '-'})")
+
+    sol_id = trabajo.get('odoo_sale_order_line_id')
+    if not sol_id:
+        return
+    Move, Picking = odoo_api.env['stock.move'], odoo_api.env['stock.picking']
+    pick_ids = {m['picking_id'][0] for m in Move.search_read(
+        [('sale_line_id', '=', sol_id), ('picking_id', '!=', False),
+         ('picking_id.picking_type_code', '=', 'outgoing'), ('picking_id.state', 'not in', ['done', 'cancel'])],
+        ['picking_id'])}
+    for pick_id in pick_ids:
+        sol_del_picking = {m['sale_line_id'][0] for m in Move.search_read(
+            [('picking_id', '=', pick_id), ('sale_line_id', '!=', False)], ['sale_line_id'])}
+        fechas = [fecha_por_linea[s] for s in sol_del_picking if s in fecha_por_linea]
+        if not fechas:
+            continue
+        fecha_con_hora = f"{max(fechas)} {mapeos.ODOO_SCHEDULED_TIME}"
+        Picking.write([pick_id], {'scheduled_date': fecha_con_hora, 'date_deadline': fecha_con_hora})
+        _logger.info(f"    -> 📅 Entrega {pick_id}: fecha programada {fecha_con_hora}")
+    if trabajo.get('odoo_sale_order_id') and fecha_por_linea:
+        odoo_api.env['sale.order'].write([trabajo['odoo_sale_order_id']],
+                                         {'commitment_date': f"{max(fecha_por_linea.values())} {mapeos.ODOO_SCHEDULED_TIME}"})
 
 
 def run():
@@ -1031,6 +1080,12 @@ def run():
             conn_update.commit()
             conn_update.close()
             _logger.info(f"  -> 💾 Base de datos local actualizada con el ID de la OF.")
+
+            # Fecha de entrega POD (regla 2026-10-13). Si falla no frena la OF.
+            try:
+                actualizar_fecha_entrega_pod(odoo_api, trabajo)
+            except Exception as e_fecha:
+                _logger.warning(f"    ⚠️ No se pudo actualizar la fecha de entrega de {order_code}-{line_number}: {e_fecha}")
 
         except Exception as e:
             _logger.error(f"  -> ❌❌ ERROR DETALLADO en Script 05: {e} ❌❌")

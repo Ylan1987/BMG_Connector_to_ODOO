@@ -81,7 +81,8 @@ def inicializar_db():
         'x_comision_bmg_propia': 'REAL',
         'x_total_bmg_terceros': 'REAL',
         'x_total_bmg_propio': 'REAL',
-        'x_total_lad_uy': 'REAL'
+        'x_total_lad_uy': 'REAL',
+        'fecha_entrega_calculada': 'TEXT', # YYYY-MM-DD, la calcula Script 05 al entrar a produccion (POD)
     }
 
     for nombre_col, tipo_col in columnas_deseadas.items():

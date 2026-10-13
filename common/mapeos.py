@@ -350,9 +350,14 @@ ODOO_UOM_PRODUCT_UOM_UNIT_XMLID = 'uom.product_uom_unit'
 ODOO_LOCATION_CUSTOMERS_XMLID = 'stock.stock_location_customers'
 ODOO_SCHEDULED_TIME = "18:00:00"
 ODOO_SHIPPING_NOTE_DEFAULT = "Sin observaciones."
-EDIST_DELIVERY_RULES = { 0: 3, 1: 3, 2: 3, 3: 4, 4: 5, 5: 4, 6: 3 }
+EDIST_DELIVERY_RULES = { 0: 3, 1: 3, 2: 3, 3: 4, 4: 5, 5: 4, 6: 3 }  # regla vieja, ya no se usa (ver common/fechas_entrega.py)
 EDIST_DELIVERY_RULE_OVERRIDE_WEDNESDAY = 2
 EDIST_DELIVERY_RULE_OVERRIDE_SATURDAY = 4
+# --- Fechas de entrega (regla 2026-10-13, ver common/fechas_entrega.py) ---
+HORA_CORTE_ENTREGA = (9, 0)          # hasta las 9:00 de un dia habil -> se entrega ese dia
+POD_COPIAS_MAX_MISMO_DIA = 10        # POD de hasta 10 ejemplares por libro -> misma regla de corte
+DIAS_HABILES_POD_GRANDE = 5          # el resto: fecha BMG o 5 dias habiles, la mas proxima
+FERIADOS_NO_LABORABLES = {(1, 1), (5, 1), (7, 18), (8, 25), (12, 25)}  # (mes, dia)
 ODOO_CONTACT_DEFAULT_NAME = "Envio Desconocido"
 ODOO_PARTNER_TYPE_DELIVERY = 'delivery'
 BMG_ORDER_TYPE_POD = "POD"

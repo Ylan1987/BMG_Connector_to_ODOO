@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timedelta
 
 # Importar módulos comunes de la V2.0
-from common import mapeos, db_conn, odoo_conn, meli_api
+from common import mapeos, db_conn, odoo_conn, meli_api, fechas_entrega
 from common.notificador import enviar_email # Importar el notificador
 import common.bmg_estados_mapeo as bmg_estados_mapeo
 from common.bmg_task_sync import aplicar_accion_por_estado_bmg
@@ -279,7 +279,14 @@ def generar_transferencias_envio_odoo(odoo_api, so_id, cliente_principal_id, dat
         trabajo_cabecera = grupo_trabajos[0]
         fecha_programada = False
         if mapeos.BMG_ORDER_TYPE_EDIST_GENERIC in trabajo_cabecera.get('order_type', ''):
-            fecha_programada = _calcular_fecha_entrega_edist(trabajo_cabecera.get('order_date'))
+            # Regla 2026-10-13: corte a las 9:00 sobre la hora de deteccion
+            # (creacion del pedido en Odoo; BMG manda OrderDate sin hora).
+            # Ver common/fechas_entrega.py.
+            try:
+                momento_entrada = fechas_entrega.a_hora_uy(sale_order.create_date)
+            except Exception:
+                momento_entrada = fechas_entrega.ahora_uy()
+            fecha_programada = fechas_entrega.dia_de_corte(momento_entrada).strftime('%Y-%m-%d')
         elif trabajo_cabecera.get('delivery_date') and len(trabajo_cabecera.get('delivery_date')) == 8:
             try: fecha_programada = datetime.strptime(trabajo_cabecera.get('delivery_date'), '%Y%m%d').strftime('%Y-%m-%d')
             except ValueError: pass
